@@ -1,0 +1,84 @@
+//
+// Created by Timm Felden on 28.03.19.
+//
+
+#ifndef OGSS_CPP_STATEINITIALIZER_H
+#define OGSS_CPP_STATEINITIALIZER_H
+
+#include "PoolBuilder.h"
+#include "../api/File.h"
+#include "../streams/FileInputStream.h"
+
+namespace ogss {
+    namespace fieldTypes {
+        class HullType;
+    }
+    namespace internal {
+
+        class AbstractPool;
+
+        class EnumPool;
+
+        using streams::FileInputStream;
+        using fieldTypes::AnyRefType;
+        using fieldTypes::HullType;
+
+        struct StateInitializer {
+
+            static StateInitializer *make(const std::string &path, const PoolBuilder &pb, int mode);
+
+            const std::string &path;
+            std::unique_ptr<FileInputStream> in;
+            bool canWrite;
+
+            // guard from file
+            std::unique_ptr<std::string> guard;
+
+            // complex builtin types
+            StringPool *Strings;
+            AnyRefType *AnyRef;
+
+            // types
+            std::vector<internal::AbstractPool *> classes;
+            std::vector<HullType *> containers;
+            std::vector<EnumPool *> enums;
+
+            /**
+             * State Initialization of Fields Array. We will memcpy the variable part of the array into the first field to
+             * achieve state initialization.
+             *
+             * @note invariant: ∀i. SIFA[i].name == pb.KCN(i)
+             * @note SIFA owns nothing; types are owned by type vectors above.
+             */
+            FieldType **const SIFA;
+            const size_t sifaSize;
+
+        protected:
+            /**
+             * next SIFA ID to be used if some type is added to SIFA
+             */
+            int nsID;
+
+            /**
+             * The next global field ID. Note that this ID does not correspond to the ID used in the file about to be read but
+             * to an ID that would be used if it were written.
+             *
+             * @note to make this work as intended, merging known fields into the dataFields array has to be done while reading
+             *       F.
+             * @note ID 0 is reserved for the String hull which is always present
+             */
+            int nextFieldID;
+
+            StateInitializer(const std::string &path, FileInputStream *in, const PoolBuilder &pb);
+
+            virtual ~StateInitializer();
+
+            /**
+             * Calculate correct maxDeps values for containers used by containers.
+             */
+            void fixContainerMD();
+        };
+    }
+}
+
+#endif //OGSS_TEST_CPP_STATEINITIALIZER_H

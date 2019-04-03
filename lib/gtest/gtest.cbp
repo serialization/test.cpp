@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="gtest"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\lib\;CMake Files\lib\gtest\;CMake Files\lib\gtest\cmake\;CMake Files\lib\skill.cpp.common\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest">
+				<Option output="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/libgtest.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/skill.cpp.common"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/include"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 gtest"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest/fast">
+				<Option output="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/libgtest.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/skill.cpp.common"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/include"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 gtest/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest_main">
+				<Option output="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/libgtest_main.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/skill.cpp.common"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/include"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 gtest_main"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest_main/fast">
+				<Option output="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/libgtest_main.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/skill.cpp.common"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/include"/>
+					<Add directory="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 gtest_main/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/src/gtest-all.cc">
+			<Option target="gtest"/>
+		</Unit>
+		<Unit filename="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/src/gtest_main.cc">
+			<Option target="gtest_main"/>
+		</Unit>
+		<Unit filename="/home/feldentm/projekte/forschung/skill/testsuites/cpp/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\lib\gtest\"/>
+		</Unit>
+		<Unit filename="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/gtest/cmake/internal_utils.cmake">
+			<Option virtualFolder="CMake Files\lib\gtest\cmake\"/>
+		</Unit>
+		<Unit filename="/home/feldentm/projekte/forschung/skill/testsuites/cpp/lib/skill.cpp.common/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\lib\skill.cpp.common\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
