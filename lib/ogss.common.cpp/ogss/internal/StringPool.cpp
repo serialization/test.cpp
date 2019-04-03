@@ -9,9 +9,7 @@ using namespace ogss;
 using api::String;
 
 internal::StringPool::StringPool(streams::FileInputStream *in)
-        : StringAccess(9), in(in), knownStrings(), idMap(), stringPositions(), lastID(0) {
-    // ensure existence of fake entry
-    stringPositions.push_back(std::pair<long, int>(-1L, -1));
+        : StringAccess(9), in(in), knownStrings(), idMap(), positions(nullptr), lastID(0) {
     idMap.push_back(nullptr);
 }
 
@@ -54,34 +52,73 @@ void internal::StringPool::addLiteral(String target) {
     literals.insert(target);
 }
 
-//void internal::StringPool::prepareAndWrite(ogss::streams::FileOutputStream *out) {
-//    SK_TODO;
-////    // Insert new strings to the map;
-////    // this is where duplications with lazy strings will be detected and eliminated
-////    for (auto s : knownStrings) {
-////        if (-1 == s->id) {
-////            const_cast<api::string_t *>(s)->id = (ObjectID) idMap.size();
-////            idMap.push_back(s);
-////        }
-////    }
-////
-////    const int64_t count = idMap.size() - 1;
-////    // write block, if nonempty
-////    if (count) {
-////        out->v64(count);
-////        for (int i = 1; i <= count; i++) {
-////            out->v64(idMap[i]->length());
-////        }
-////        for (int i = 1; i <= count; i++) {
-////            out->put(idMap[i]);
-////        }
-////    } else {
-////        out->i8(0);
-////    }
-//}
-//
-//void internal::StringPool::prepareSerialization() {
-//    // ensure all strings are present
-//    for (auto i = stringPositions.size() - 1; i != 0; i--)
-//        get(static_cast<ObjectID>(i));
-//}
+
+size_t internal::StringPool::S(int count, ogss::streams::InStream *in) {
+    if (0 == count)
+        return in->getPosition();
+
+    // read offsets
+    int *offsets = new int[count];
+    for (int i = 0; i < count; i++) {
+        offsets[i] = in->v32();
+    }
+
+    // resize string positions
+    int spi;
+    if (!positions) {
+        positions = new uint64_t[1 + count];
+        positions[0] = -1L;
+        spi = 1;
+    } else {
+        spi = idMap.size();
+        auto sp = new uint64_t[spi + count];
+        std::memcpy(sp, positions, spi * sizeof(uint64_t));
+        delete[] positions;
+        positions = sp;
+    }
+
+    // store offsets
+    // @note this has to be done after reading all offsets, as sizes are relative to that point and decoding
+    // is done using absolute sizes
+    size_t last = in->getPosition(), len;
+    for (int i = 0; i < count; i++) {
+        len = offsets[i];
+        positions[spi++] = (((uint64_t) last) << 32UL) | len;
+        last += len;
+    }
+    idMap.insert(idMap.cend(), (size_t) count, nullptr);
+    lastID += count;
+
+    delete[] offsets;
+    return last;
+}
+
+void internal::StringPool::read() {
+    // TODO broken architecture?
+    throw std::logic_error("dead_code");
+}
+
+bool internal::StringPool::write(ogss::streams::BufferedOutStream *out) {
+    const int count = idMap.size() - hullOffset;
+    if (0 == count)
+        return true;
+
+    out->v64(count);
+
+    // lengths
+    for (int i = 0; i < count; i++) {
+        out->v64((int) idMap[i + hullOffset]->size());
+    }
+
+    // data
+    for (int i = 0; i < count; i++) {
+        const String s = idMap[i + hullOffset];
+        out->put(reinterpret_cast<const uint8_t *>(s->c_str()), s->size());
+    }
+
+    return false;
+}
+
+void internal::StringPool::allocateInstances(int count, ogss::streams::MappedInStream *in) {
+    S(count, in);
+}

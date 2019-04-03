@@ -34,8 +34,6 @@ File::File(internal::StateInitializer *init)
     init->Strings = nullptr;
     init->AnyRef = nullptr;
 
-    std::memcpy(const_cast<fieldTypes::FieldType **>(SIFA), init->SIFA + 10, init->sifaSize);
-
     for (size_t i = 0; i < classCount; i++) {
         auto t = init->classes[i];
         t->owner = this;

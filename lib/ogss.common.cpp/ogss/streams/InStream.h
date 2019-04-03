@@ -255,11 +255,12 @@ namespace ogss {
              * create a string from the stream
              * @note the caller owns the string!
              */
-            String string(int length, ObjectID id) {
-                ensure(position + length <= end);
-                ensure(id > 0);
+            String string(uint32_t offset, uint32_t length, ObjectID id) {
+                ensure((bool) (id > 0)
+                       & (bool) (offset > 0)
+                       & (bool) ((uint8_t *) base + offset + length <= (uint8_t *) end));
 
-                String rval = new std::string((const char *) position, length);
+                String rval = new std::string((const char *) base + offset, length);
                 position = position + length;
                 return rval;
             }

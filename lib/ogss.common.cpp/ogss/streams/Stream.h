@@ -48,10 +48,10 @@ namespace ogss {
             virtual ~Stream() { }
 
             /**
-             * the position of this stream inside of its bounds
+             * the position of this stream within its bounds
              */
-            long getPosition() const noexcept {
-                return (long) position - (long) base;
+            size_t getPosition() const noexcept {
+                return (size_t) position - (size_t) base;
             }
 
             inline bool eof() const noexcept {

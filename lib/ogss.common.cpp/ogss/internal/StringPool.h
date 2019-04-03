@@ -47,13 +47,12 @@ namespace ogss {
             mutable std::vector<String> idMap;
 
             /**
-             * ID ⇀ (absolute offset, length)
-             *
-             * will be used if idMap contains a null reference
+             * ID ⇀ (absolute offset|32, length|32) will be used if idMap contains a nullptr
              *
              * @note there is a fake entry at ID 0
+             * @note offset|32 is sane as long as JVM-targets are unable to read files larger than 2GB
              */
-            std::vector<std::pair<long, int>> stringPositions;
+            uint64_t *positions;
 
             /**
              * next legal ID, used to check access
@@ -86,12 +85,6 @@ namespace ogss {
              */
             virtual void addLiteral(String target);
 
-            inline void addPosition(std::pair<long, int> position) {
-                idMap.push_back(nullptr);
-                stringPositions.push_back(position);
-                lastID++;
-            }
-
             api::Box get(ObjectID ID) const {
                 api::Box r;
                 r.string = byID(ID);
@@ -111,11 +104,8 @@ namespace ogss {
 #pragma omp critical
                         {
                             // read result
-                            auto off = stringPositions[index];
-                            long mark = in->getPosition();
-                            in->jump(off.first);
-                            result = in->string(off.second, index);
-                            in->jump(mark);
+                            uint64_t off = positions[index];
+                            result = in->string(off >> 32LU, (uint32_t) off, index);
 
                             // unify result with known strings
                             auto it = knownStrings.find(result);
@@ -139,11 +129,21 @@ namespace ogss {
 
         private:
 
+            /**
+             * Read a string block
+             *
+             * @return the position behind the string block
+             */
+            size_t S(int count, ogss::streams::InStream *in);
+
             void read() final;
 
-            bool write(ogss::streams::BufferedOutStream*) final;
+            /// id offset of the actual hull (this type also has two areas where instances are stored)
+            int hullOffset;
 
-            void allocateInstances(int, ogss::streams::MappedInStream*) final;
+            bool write(ogss::streams::BufferedOutStream *) final;
+
+            void allocateInstances(int, ogss::streams::MappedInStream *) final;
 
             friend class StateInitializer;
         };

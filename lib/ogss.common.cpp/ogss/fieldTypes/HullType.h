@@ -14,6 +14,7 @@
 namespace ogss {
     namespace internal {
         class StateInitializer;
+
         class Creator;
     }
     namespace fieldTypes {
@@ -61,7 +62,7 @@ namespace ogss {
              *
              * @note should be Array[T]
              */
-            std::vector<void *> idMap;
+            mutable std::vector<void *> idMap;
 
             /**
              * get ID from Object
@@ -119,6 +120,7 @@ namespace ogss {
                     ObjectID &rval = IDs[ref];
                     if (!rval) {
                         rval = idMap.size();
+                        idMap.push_back((void *) ref);
                     }
                     r = rval;
                 }
@@ -145,6 +147,7 @@ namespace ogss {
             friend class AnyRefType;
 
             friend class internal::Creator;
+
             friend class internal::StateInitializer;
         };
     }

@@ -156,7 +156,7 @@ namespace ogss {
                 } else if (NamedObj *no = dynamic_cast<NamedObj *>(ref))
                     return no->pool;
                 else
-                    return (internal::AbstractPool *) SIFA[ref->stid()];
+                    return (internal::AbstractPool *) SIFA[ref->stid() - 10];
             }
 
             /**
@@ -266,6 +266,7 @@ namespace ogss {
              * The generated Files contain one field per statically known type.
              * These fields are placed right after this field.
              *
+             * @note OGSS/C++ generates static_asserts that ensure the correct layout has been chosen
              * @note to self: this might be a ** pointing to the first declared field, if the C++-implementation is utter garbage :-]
              */
             fieldTypes::FieldType *const SIFA[0];
