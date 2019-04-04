@@ -22,6 +22,8 @@ namespace ogss {
          */
         class Parser : public StateInitializer {
 
+            void parseFile(FileInputStream *in);
+
             /**
              * Turns a field type into a preliminary type information. In case of user types, the declaration of the respective
              * user type may follow after the field declaration.
@@ -59,7 +61,7 @@ namespace ogss {
 
             void TEnum();
 
-            void readFields(AbstractPool* p);
+            void readFields(AbstractPool *p);
 
             virtual void processData() = 0;
         };

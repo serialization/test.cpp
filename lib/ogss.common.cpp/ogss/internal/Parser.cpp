@@ -11,11 +11,8 @@
 #include "../fieldTypes/SetType.h"
 #include "../fieldTypes/MapType.h"
 
-ogss::internal::Parser::Parser(
-        const std::string &path, FileInputStream *in, const PoolBuilder &pb)
-        : StateInitializer(path, in, pb),
-          pb(pb), fields(), fdts() {
 
+void ogss::internal::Parser::parseFile(FileInputStream *in) {
     // G
     {
         const uint8_t first = in->i8();
@@ -31,7 +28,7 @@ ogss::internal::Parser::Parser(
             auto buf = new std::string();
             guard.reset(buf);
             char next;
-            while (next = in->i8()) {
+            while ((next = in->i8())) {
                 buf += next;
             }
         } else
@@ -61,6 +58,14 @@ ogss::internal::Parser::Parser(
     if (!in->eof()) {
         ParseException(in, "Expected end of file, but some bytes remain.");
     }
+}
+
+
+ogss::internal::Parser::Parser(
+        const std::string &path, FileInputStream *in, const PoolBuilder &pb)
+        : StateInitializer(path, in, pb),
+          pb(pb), fields(), fdts() {
+    parseFile(in);
 }
 
 void ogss::internal::Parser::ParseException(ogss::InStream *in, const std::string &msg) {
@@ -370,5 +375,58 @@ void ogss::internal::Parser::TContainer() {
         }
         fields.push_back(r);
         fdts.push_back(r);
+    }
+}
+
+void ogss::internal::Parser::TEnum() {
+    // next type ID
+    int tid = 10 + classes.size() + containers.size();
+
+    int ki = 0;
+    String nextName = pb.enumName(ki);
+    // TODO EnumPool* r;
+    // create enums from file
+    for (int count = in->v32(); count != 0; count--) {
+        SK_TODO;
+        //        String name = Strings.get(in.v32());
+        //        int vcount = in.v32();
+        //        if (vcount <= 0)
+        //            throw new ParseException(in, null, "Enum %s is too small.", name);
+        //
+        //        String[] vs = new String[vcount];
+        //        for (int i = 0; i < vcount; i++) {
+        //            vs[i] = Strings.get(in.v32());
+        //        }
+        //
+        //        int cmp = null != nextName ? compare(name, nextName) : -1;
+        //
+        //        while (true) {
+        //            if (0 == cmp) {
+        //                r = new EnumPool(tid++, name, vs, pb.enumMake(ki++));
+        //                enums.add(r);
+        //                fdts.add(r);
+        //                SIFA[nsID++] = r;
+        //                nextName = pb.enumName(ki);
+        //                break;
+        //
+        //            } else if (cmp < 1) {
+        //                r = new EnumPool(tid++, name, vs, null);
+        //                enums.add(r);
+        //                fdts.add(r);
+        //                break;
+        //            }
+        //
+        //            r = new EnumPool(tid++, nextName, null, pb.enumMake(ki++));
+        //            enums.add(r);
+        //            SIFA[nsID++] = r;
+        //            nextName = pb.enumName(ki);
+        //            cmp = null != nextName ? compare(name, nextName) : -1;
+        //        }
+    }
+    // create remaining known enums
+    while (nextName) {
+        SK_TODO;
+        //        enums.add(new EnumPool(tid++, nextName, null, pb.enumMake(ki++)));
+        //        nextName = pb.enumName(ki);
     }
 }
