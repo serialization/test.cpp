@@ -17,6 +17,7 @@ namespace ogss {
     using namespace api;
     namespace internal {
         class StateInitializer;
+        class Parser;
 
         /**
          * Implementation of all string handling.
@@ -141,10 +142,11 @@ namespace ogss {
             /// id offset of the actual hull (this type also has two areas where instances are stored)
             int hullOffset;
 
-            bool write(ogss::streams::BufferedOutStream *) final;
+            bool write(ogss::streams::BufferedOutStream &) final;
 
             void allocateInstances(int, ogss::streams::MappedInStream *) final;
 
+            friend class Parser;
             friend class StateInitializer;
         };
     }

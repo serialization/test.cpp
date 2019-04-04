@@ -27,7 +27,7 @@ namespace ogss {
             FieldType *const base;
 
             api::Box get(ObjectID ID) const final {
-                return api::box((0 < ID & ID < idMap.size())
+                return api::box(((0 < ID) & (ID < idMap.size()))
                                 ? idMap[ID]
                                 : nullptr);
             }

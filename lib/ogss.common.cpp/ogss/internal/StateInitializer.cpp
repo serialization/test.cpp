@@ -9,6 +9,7 @@
 #include "../fieldTypes/BuiltinFieldType.h"
 #include "../fieldTypes/SingleArgumentType.h"
 #include "../fieldTypes/MapType.h"
+#include "SeqParser.h"
 
 using namespace ogss::internal;
 using namespace ogss::fieldTypes;
@@ -19,11 +20,12 @@ StateInitializer *StateInitializer::make(
     if (mode & api::ReadMode::create)
         init = new Creator(path, pb);
     else {
-        SK_TODO;
-        //        FileInputStream *fs = new FileInputStream::open(path);
-        //
-        //        if (fs.size() < Parser.SEQ_LIMIT)
-        //            init = new SeqParser(path, fs, pb);
+        FileInputStream *fs = new FileInputStream(path);
+
+        if (fs->size() < SEQ_PARSER_LIMIT)
+            init = new SeqParser(path, fs, pb);
+        else
+            SK_TODO + "par parser";
         //        else
         //            init = new ParParser(path, fs, pb);
     }
@@ -65,7 +67,7 @@ void StateInitializer::fixContainerMD() {
                     h->maxDeps++;
                 }
             } else {
-                auto m = (MapType *) c;
+                auto m = (MapType<api::Box, api::Box> *) c;
                 if (auto b = dynamic_cast<HullType *>(m->keyType)) {
                     b->maxDeps++;
                 }

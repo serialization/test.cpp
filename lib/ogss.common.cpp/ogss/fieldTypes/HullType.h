@@ -16,6 +16,8 @@ namespace ogss {
         class StateInitializer;
 
         class Creator;
+
+        class Parser;
     }
     namespace fieldTypes {
         class AnyRefType;
@@ -97,7 +99,7 @@ namespace ogss {
              * @note the fieldID is written by the caller
              * @return true iff hull shall be discarded (i.e. it is empty)
              */
-            virtual bool write(streams::BufferedOutStream *out) = 0;
+            virtual bool write(streams::BufferedOutStream &out) = 0;
 
 
             explicit HullType(TypeID tid, uint32_t kcc) : FieldType(tid), kcc(kcc), idMap(), IDs() {
@@ -127,26 +129,30 @@ namespace ogss {
                 return r;
             }
 
-
-            virtual api::Box r(streams::InStream &in) const override final {
+        public:
+            api::Box r(streams::InStream &in) const final {
                 return get(in.v32());
             }
 
-            virtual bool w(api::Box v, streams::BufferedOutStream *out) const override final {
+            bool w(api::Box v, streams::BufferedOutStream &out) const final {
                 if (!v.anyRef) {
-                    out->i8(0);
+                    out.i8(0);
                     return true;
                 }
 
-                out->v64(id(v.anyRef));
+                out.v64(id(v.anyRef));
                 return false;
             }
+
+        protected:
 
             virtual void allocateInstances(int count, streams::MappedInStream *map) = 0;
 
             friend class AnyRefType;
 
             friend class internal::Creator;
+
+            friend class internal::Parser;
 
             friend class internal::StateInitializer;
         };

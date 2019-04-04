@@ -45,7 +45,7 @@ namespace ogss {
             /**
              * write a box to a stream
              */
-            virtual bool w(api::Box v, streams::BufferedOutStream *out) const = 0;
+            virtual bool w(api::Box v, streams::BufferedOutStream &out) const = 0;
         };
     }
 }

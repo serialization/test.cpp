@@ -2,8 +2,8 @@
 // Created by Timm Felden on 01.04.19.
 //
 
-#ifndef OGSS_TEST_CPP_ARRAYTYPE_H
-#define OGSS_TEST_CPP_ARRAYTYPE_H
+#ifndef OGSS_TEST_CPP_LIST_TYPE_H
+#define OGSS_TEST_CPP_LIST_TYPE_H
 
 #include "SingleArgumentType.h"
 #include "../api/Arrays.h"
@@ -12,12 +12,14 @@ namespace ogss {
     namespace fieldTypes {
 
         /**
-         * An abstract array type. Operations that require knowledge of the actual type are
+         * An abstract list type. Operations that require knowledge of the actual type are
          * split to the Implementation part. The type parameter is the same as for the managed
          * Array class.
+         *
+         * @todo implemented tyr.containers.ALL in C++ and use it instead of Array
          */
         template<typename T>
-        class ArrayType final : public SingleArgumentType {
+        class ListType final : public SingleArgumentType {
             streams::MappedInStream *in;
 
             void allocateInstances(int count, streams::MappedInStream *map) final {
@@ -56,16 +58,16 @@ namespace ogss {
             }
 
         public:
-            ArrayType(TypeID tid, uint32_t kcc, FieldType *const base)
+            ListType(TypeID tid, uint32_t kcc, FieldType *const base)
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}
 
             /// simplify code generation
-            inline api::Array<T> *read(streams::InStream &in) {
-                return (api::Array<T> *) r(in).array;
+            inline api::Array <T> *read(streams::InStream &in) {
+                return (api::Array<T> *) r(in).list;
             }
         };
     }
 }
 
 
-#endif //OGSS_TEST_CPP_ARRAYTYPE_H
+#endif //OGSS_TEST_CPP_LIST_TYPE_H

@@ -30,7 +30,7 @@ namespace ogss {
          */
         template<typename T, TypeID id,
                 api::Box Read(InStream &),
-                bool Write(api::Box v, streams::BufferedOutStream *out)>
+                bool Write(api::Box, streams::BufferedOutStream &)>
         struct StatelessFieldType : BuiltinFieldType<T, id> {
             StatelessFieldType() : BuiltinFieldType<T, id>() {}
 
@@ -38,7 +38,7 @@ namespace ogss {
                 return Read(in);
             }
 
-            virtual bool w(api::Box v, streams::BufferedOutStream *out) const {
+            virtual bool w(api::Box v, streams::BufferedOutStream &out) const {
                 return Write(v, out);
             }
         };
@@ -76,7 +76,7 @@ namespace ogss {
         struct V64FieldType : public StatelessFieldType<int64_t, 5, InStream::v64Box,
                 BufferedOutStream::v64Box> {
         };
-        
+
         const V64FieldType V64;
 
         struct F32FieldType : public StatelessFieldType<float, 6, InStream::i32Box,

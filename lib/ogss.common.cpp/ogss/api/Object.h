@@ -30,19 +30,6 @@ namespace ogss {
          * every known and unknown skill type instance.
          */
         class Object {
-            friend class internal::AbstractPool;
-
-            template<typename T>
-            friend
-            struct std::hash;
-
-            friend class internal::FieldDeclaration;
-
-            friend class internal::DistributedField;
-
-            friend class internal::LazyField;
-
-            friend class fieldTypes::AnyRefType;
 
         protected:
             ObjectID id;
@@ -66,12 +53,28 @@ namespace ogss {
              * inserts a human readable presentation of the object into the argument ostream
              *
              * @note constant time operation, i.e. referenced objects are not pretty themselves
+             *
+             * @todo should not be virtual!
              */
             virtual void prettyString(std::ostream &os) const = 0;
+
+            friend class internal::AbstractPool;
 
             template<class T>
             friend
             class internal::Pool;
+
+            template<typename T>
+            friend
+            struct std::hash;
+
+            friend class internal::FieldDeclaration;
+
+            friend class internal::DistributedField;
+
+            friend class internal::LazyField;
+
+            friend class fieldTypes::AnyRefType;
         };
 
         /**

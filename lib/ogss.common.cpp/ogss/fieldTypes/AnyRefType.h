@@ -61,18 +61,18 @@ namespace ogss {
                 return r;
             }
 
-            bool w(api::Box target, streams::BufferedOutStream *out) const final {
+            bool w(api::Box target, streams::BufferedOutStream &out) const final {
                 if (target.anyRef) {
                     if (Object *ref = dynamic_cast<Object *>(target.anyRef)) {
-                        out->v64(owner->pool(ref)->typeID);
-                        out->v64(target.anyRef->id);
+                        out.v64(owner->pool(ref)->typeID);
+                        out.v64(target.anyRef->id);
                     } else {
-                        out->i8(1);
-                        out->v64(owner->strings->id(target.string));
+                        out.i8(1);
+                        out.v64(owner->strings->id(target.string));
                     }
                     return false;
                 } else {
-                    out->i8(0);
+                    out.i8(0);
                     return true;
                 }
             }

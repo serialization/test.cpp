@@ -1,0 +1,374 @@
+//
+// Created by Timm Felden on 03.04.19.
+//
+
+#include "Parser.h"
+#include "UnknownObject.h"
+#include "SubPool.h"
+#include "../fieldTypes/AnyRefType.h"
+#include "../fieldTypes/ArrayType.h"
+#include "../fieldTypes/ListType.h"
+#include "../fieldTypes/SetType.h"
+#include "../fieldTypes/MapType.h"
+
+ogss::internal::Parser::Parser(
+        const std::string &path, FileInputStream *in, const PoolBuilder &pb)
+        : StateInitializer(path, in, pb),
+          pb(pb), fields(), fdts() {
+
+    // G
+    {
+        const uint8_t first = in->i8();
+        // guard is 22 26?
+        if (first == 0x22) {
+            if (in->i8() != 0x26)
+                ParseException(in, "Illegal guard.");
+
+            guard.reset(new std::string());
+        }
+            // guard is hash?
+        else if (first == 0x23) {
+            auto buf = new std::string();
+            guard.reset(buf);
+            char next;
+            while (next = in->i8()) {
+                buf += next;
+            }
+        } else
+            ParseException(in, "Illegal guard.");
+    }
+
+    // S
+    try {
+        fields.push_back(Strings);
+        int count = in->v32();
+
+        if (0 != count) {
+            in->jump(Strings->S(count, in));
+        }
+    } catch (std::exception &e) {
+        ParseException(in, std::string("corrupted string block") += e.what());
+    }
+
+    // T
+    typeBlock();
+
+    fixContainerMD();
+
+    // HD
+    processData();
+
+    if (!in->eof()) {
+        ParseException(in, "Expected end of file, but some bytes remain.");
+    }
+}
+
+void ogss::internal::Parser::ParseException(ogss::InStream *in, const std::string &msg) {
+    throw Exception(std::string("ParseException at ") + std::to_string(in->getPosition()) + ": " + msg);
+}
+
+void ogss::internal::Parser::typeDefinitions() {
+    int index = 0;
+    int THH = 0;
+    // the index of the next known class at index THH
+    int nextID[50];
+    // the nextName, null if there is no next PD
+    String nextName = pb.name(0);
+
+    AbstractPool *p, *last;
+    AbstractPool *result;
+
+    // Name of all seen class names to prevent duplicate allocation of the same pool.
+    std::unordered_set<String> seenNames;
+    int TCls = in->v32();
+
+    // file state
+    String name;
+    int count = 0;
+    AbstractPool *superDef;
+    std::unordered_set<TypeRestriction *> *attr;
+    int bpo = 0;
+
+    for (bool moreFile = TCls > 0; (moreFile = TCls > 0) | (nullptr != nextName); TCls--) {
+        // read next pool from file if required
+        if (moreFile) {
+            // name
+            name = Strings->r(*in).string;
+            if (!name) {
+                ParseException(in.get(), "corrupted file: nullptr in type name");
+            }
+
+            // static size
+            count = in->v32();
+
+            // attr
+            {
+                const int rc = in->v32();
+                if (0 == rc)
+                    attr = nullptr;
+                else
+                    attr = typeRestrictions(rc);
+            }
+
+            // super
+            {
+                const int superID = in->v32();
+                if (0 == superID) {
+                    superDef = nullptr;
+                    bpo = 0;
+                } else if (superID > fdts.size() - 10)
+                    ParseException(in.get(), std::string("Type ") + *name +
+                                             " refers to an ill-formed super type.\n          found: " +
+                                             std::to_string(superID) +
+                                             "; current number of other types " + std::to_string(fdts.size() - 10));
+                else {
+                    superDef = dynamic_cast<AbstractPool *>(fdts[superID + 9]);
+                    bpo = in->v32();
+                }
+            }
+        }
+
+        // allocate pool
+        bool keepKnown, keepFile = !moreFile;
+        api::ogssLess compare;
+        do {
+            keepKnown = nullptr == nextName;
+
+            if (moreFile) {
+                // check common case, i.e. the next class is the expected one
+                if (!keepKnown) {
+                    if (superDef == p) {
+                        if (name == nextName) {
+                            // the next pool is the expected one
+                            keepFile = false;
+
+                        } else if (compare(name, nextName)) {
+                            // we have to advance the file pool
+                            keepKnown = true;
+                            keepFile = false;
+
+                        } else {
+                            // we have to advance known pools
+                            keepFile = true;
+                        }
+                    } else {
+
+                        // depending on the files super THH, we can decide if we have to process the files type or
+                        // our type first;
+                        // invariant: p != superDef ⇒ superDef.THH != THH
+                        // invariant: ∀p. p.next.THH <= p.THH + 1
+                        // invariant: ∀p. p.Super = null <=> p.THH = 0
+                        if (superDef && superDef->THH < THH) {
+                            // we have to advance known pools
+                            keepFile = true;
+
+                        } else {
+                            // we have to advance the file pool
+                            keepKnown = true;
+                            keepFile = false;
+                        }
+                    }
+                } else {
+                    // there are no more known pools
+                    keepFile = false;
+                }
+            } else if (keepKnown) {
+                // we are done
+                return;
+            }
+
+            // create the next pool
+            if (keepKnown) {
+                // an unknown pool has to be created
+                if (superDef) {
+                    result = superDef->makeSub(index++, name, attr);
+                } else {
+                    last = nullptr;
+                    result = new SubPool<UnknownObject>(index++, nullptr, name, attr);
+                }
+                result->bpo = bpo;
+                fdts.push_back(result);
+                classes.push_back(result);
+
+                // set next
+                if (last) {
+                    last->next = result;
+                }
+                last = result;
+            } else {
+                if (p) {
+                    p = p->makeSub(nextID[THH]++, index++, attr);
+                } else {
+                    last = nullptr;
+                    p = pb.make(nextID[0]++, index++);
+                }
+                // @note this is sane, because it is 0 if p is not part of the type hierarchy of superDef
+                p->bpo = bpo;
+                SIFA[nsID++] = p;
+                classes.push_back(p);
+
+                if (!keepFile) {
+                    result = p;
+                    fdts.push_back(result);
+                }
+
+                // set next
+                if (last) {
+                    last->next = p;
+                }
+                last = p;
+
+                // move to next pool
+                {
+                    // try to move down to our first child
+                    nextName = p->nameSub(nextID[++THH] = 0);
+
+                    // move up until we find a next pool
+                    while (nullptr == nextName & THH != 1) {
+                        p = p->super;
+                        nextName = p->nameSub(nextID[--THH]);
+                    }
+                    // check at base type level
+                    if (nullptr == nextName) {
+                        p = nullptr;
+                        nextName = pb.name(nextID[THH = 0]);
+                    }
+                }
+            }
+            // check for duplicate adds
+            if (seenNames.find(last->name) != seenNames.end()) {
+                throw ogss::Exception("duplicate definition of type " + *last->name);
+            }
+            seenNames.insert(last->name);
+        } while (keepFile);
+
+        result->cachedSize = result->staticDataInstances = count;
+
+        // add a null value for each data field to ensure that the temporary size of data fields matches those
+        // from file
+        int fields = in->v32();
+        if (fields)
+            result->dataFields.insert(result->dataFields.end(), fields, nullptr);
+    }
+}
+
+std::unordered_set<ogss::TypeRestriction *> *ogss::internal::Parser::typeRestrictions(int count) {
+    SK_TODO;
+}
+
+using ogss::fieldTypes::FieldType;
+
+FieldType *ogss::internal::Parser::fieldType() {
+    const TypeID typeID = in->v32();
+    switch (typeID) {
+        case 0:
+            return (FieldType *) &fieldTypes::BoolType;
+        case 1:
+            return (FieldType *) &fieldTypes::I8;
+        case 2:
+            return (FieldType *) &fieldTypes::I16;
+        case 3:
+            return (FieldType *) &fieldTypes::I32;
+        case 4:
+            return (FieldType *) &fieldTypes::I64;
+        case 5:
+            return (FieldType *) &fieldTypes::V64;
+        case 6:
+            return (FieldType *) &fieldTypes::F32;
+        case 7:
+            return (FieldType *) &fieldTypes::F64;
+        case 8:
+            return AnyRef;
+        case 9:
+            return Strings;
+        default:
+            return fdts.at(typeID - 10);
+    }
+}
+
+
+static uint32_t toUCC(uint32_t kind, FieldType *b1, FieldType *b2) {
+    uint32_t baseTID1 = b1->typeID;
+    uint32_t baseTID2 = !b2 ? 0 : b2->typeID;
+    if (baseTID2 < baseTID1)
+        return (baseTID1 << 17u) | (kind << 15u) | baseTID2;
+
+    return (baseTID2 << 17u) | (kind << 15u) | baseTID1;
+}
+
+void ogss::internal::Parser::TContainer() {
+    // next type ID
+    int tid = 10 + classes.size();
+    // KCC index
+    int ki = 0;
+    // @note it is always possible to construct the next kcc from SIFA
+    uint32_t kcc = pb.kcc(ki);
+    uint32_t kkind = 0;
+    FieldType *kb1, *kb2;
+    // @note using int here means that UCC may only contain TIDs < 2^14
+    uint32_t kucc = 0;
+    if (-1u != kcc) {
+        kkind = (kcc >> 30u) & 3u;
+        kb1 = SIFA[kcc & 0x7FFFu];
+        kb2 = 3 == kkind ? SIFA[(kcc >> 15u) & 0x7FFFu] : nullptr;
+        kucc = toUCC(kkind, kb1, kb2);
+    }
+
+    for (int count = in->v32(); count != 0; count--) {
+        const uint32_t fkind = in->i8();
+        FieldType *const fb1 = fieldType();
+        FieldType *const fb2 = (3 == fkind) ? fieldType() : nullptr;
+        const uint32_t fucc = toUCC(fkind, fb1, fb2);
+
+        HullType *r = nullptr;
+        int cmp = -1;
+
+        // construct known containers until we hit the state of the file
+        while (-1u != kcc && (cmp = (fucc - kucc)) >= 0) {
+            r = pb.makeContainer(kcc, tid++, kb1, kb2);
+            SIFA[nsID++] = r;
+            r->fieldID = nextFieldID++;
+            containers.push_back(r);
+
+            // move to next kcc
+            kcc = pb.kcc(++ki);
+            if (-1u != kcc) {
+                kkind = (kcc >> 30u) & 3u;
+                kb1 = SIFA[kcc & 0x7FFFu];
+                kb2 = 3 == kkind ? SIFA[(kcc >> 15u) & 0x7FFFu] : nullptr;
+                kucc = toUCC(kkind, kb1, kb2);
+            }
+
+            // break loop for perfect matches after the first iteration
+            if (0 == cmp)
+                break;
+        }
+
+        // the last constructed kcc was not the type from the file
+        if (0 != cmp) {
+            switch (fkind) {
+                case 0:
+                    r = new fieldTypes::ArrayType<api::Box>(tid++, kcc, fb1);
+                    break;
+                case 1:
+                    r = new fieldTypes::ListType<api::Box>(tid++, kcc, fb1);
+                    break;
+                case 2:
+                    r = new fieldTypes::SetType<api::Box>(tid++, kcc, fb1);
+                    break;
+
+                case 3:
+                    r = new fieldTypes::MapType<api::Box, api::Box>(tid++, kcc, fb1, fb2);
+                    break;
+
+                default:
+                    throw ogss::Exception(std::string("Illegal container constructor ID: ") + std::to_string(fkind));
+            }
+
+            r->fieldID = nextFieldID++;
+            containers.push_back(r);
+        }
+        fields.push_back(r);
+        fdts.push_back(r);
+    }
+}

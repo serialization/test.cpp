@@ -6,6 +6,7 @@
 #define OGSS_TEST_CPP_POOLBUILDER_H
 
 #include "../api/types.h"
+#include "../fieldTypes/FieldType.h"
 
 namespace ogss {
     namespace fieldTypes {
@@ -47,7 +48,9 @@ namespace ogss {
              * @note It is no longer possible for unknown fields to guess the correct
              *       representation of an underlying container. Instead, boxed bases and string have kcc -1.
              */
-            virtual fieldTypes::HullType *makeKCC(uint32_t kcc) const = 0;
+            virtual fieldTypes::HullType *makeContainer(uint32_t kcc, TypeID tid,
+                                                        fieldTypes::FieldType *kb1,
+                                                        fieldTypes::FieldType *kb2) const = 0;
 
             /**
              * @return the name of the pool corresponding to the argument known id; return null if not a valid id

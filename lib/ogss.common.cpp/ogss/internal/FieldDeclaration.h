@@ -11,6 +11,7 @@
 #include "../streams/BufferedOutStream.h"
 #include <vector>
 #include <unordered_set>
+#include "../api/Object.h"
 
 namespace ogss {
     namespace internal {
@@ -83,6 +84,9 @@ namespace ogss {
 
         protected:
 
+            static inline ObjectID objectID(api::Object* v) {
+                return v->id;
+            }
 
             template<class T>
             friend

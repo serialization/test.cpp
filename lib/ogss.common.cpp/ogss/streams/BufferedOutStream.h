@@ -73,8 +73,8 @@ namespace ogss {
                         delete[] b.begin;
             }
 
-            static inline bool boolBox(api::Box v, streams::BufferedOutStream *out) {
-                out->boolean(v.boolean);
+            static inline bool boolBox(api::Box v, streams::BufferedOutStream &out) {
+                out.boolean(v.boolean);
                 return !v.boolean;
             }
 
@@ -92,8 +92,8 @@ namespace ogss {
                 }
             }
 
-            static inline bool i8Box(api::Box v, streams::BufferedOutStream *out) {
-                out->i8(v.i8);
+            static inline bool i8Box(api::Box v, streams::BufferedOutStream &out) {
+                out.i8(v.i8);
                 return 0 == v.i8;
             }
 
@@ -102,8 +102,8 @@ namespace ogss {
                 *(current.begin++) = (uint8_t) v;
             }
 
-            static inline bool i16Box(api::Box v, streams::BufferedOutStream *out) {
-                out->i16(v.i16);
+            static inline bool i16Box(api::Box v, streams::BufferedOutStream &out) {
+                out.i16(v.i16);
                 return 0 == v.i16;
             }
 
@@ -113,8 +113,8 @@ namespace ogss {
                 current.begin += 2;
             }
 
-            static inline bool i32Box(api::Box v, streams::BufferedOutStream *out) {
-                out->i32(v.i32);
+            static inline bool i32Box(api::Box v, streams::BufferedOutStream &out) {
+                out.i32(v.i32);
                 return 0 == v.i32;
             }
 
@@ -124,24 +124,35 @@ namespace ogss {
                 current.begin += 4;
             }
 
-            static inline bool i64Box(api::Box v, streams::BufferedOutStream *out) {
-                out->i64(v.i64);
+            inline void f32(float v) {
+                require(4);
+                std::memcpy(&v, current.begin, 4);
+                current.begin += 4;
+            }
+
+            static inline bool i64Box(api::Box v, streams::BufferedOutStream &out) {
+                out.i64(v.i64);
                 return 0 == v.i64;
             }
 
-            inline void i64(int64_t p) {
-                auto v = ::ogss::unsign(p);
+            inline void i64(int64_t v) {
                 require(8);
                 std::memcpy(&v, current.begin, 8);
                 current.begin += 8;
             }
 
-            static inline bool v64Box(api::Box v, streams::BufferedOutStream *out) {
+            inline void f64(double v) {
+                require(8);
+                std::memcpy(&v, current.begin, 8);
+                current.begin += 8;
+            }
+
+            static inline bool v64Box(api::Box v, streams::BufferedOutStream &out) {
                 if (v.i64) {
-                    out->v64(v.i64);
+                    out.v64(v.i64);
                     return false;
                 } else {
-                    out->i8(0);
+                    out.i8(0);
                     return true;
                 }
             }

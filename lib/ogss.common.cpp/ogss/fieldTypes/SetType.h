@@ -2,39 +2,41 @@
 // Created by Timm Felden on 01.04.19.
 //
 
-#ifndef OGSS_TEST_CPP_ARRAYTYPE_H
-#define OGSS_TEST_CPP_ARRAYTYPE_H
+#ifndef OGSS_TEST_CPP_SET_TYPE_H
+#define OGSS_TEST_CPP_SET_TYPE_H
 
 #include "SingleArgumentType.h"
-#include "../api/Arrays.h"
+#include "../api/Sets.h"
 
 namespace ogss {
     namespace fieldTypes {
 
         /**
-         * An abstract array type. Operations that require knowledge of the actual type are
+         * An abstract set type. Operations that require knowledge of the actual type are
          * split to the Implementation part. The type parameter is the same as for the managed
-         * Array class.
+         * Set class.
+         *
+         * @todo implemented tyr.containers.ALL in C++ and use it instead of Array
          */
         template<typename T>
-        class ArrayType final : public SingleArgumentType {
+        class SetType final : public SingleArgumentType {
             streams::MappedInStream *in;
 
             void allocateInstances(int count, streams::MappedInStream *map) final {
                 in = map;
                 idMap.reserve(count);
                 while (count-- != 0)
-                    idMap.push_back(new api::Array<T>());
+                    idMap.push_back(new api::Set<T>());
             }
 
             void read() final {
                 const int count = idMap.size() - 1;
                 for (int i = 1; i <= count; i++) {
-                    auto xs = (api::Array<T> *) idMap[i];
+                    auto xs = (api::Set<T> *) idMap[i];
                     int s = in->v32();
                     xs->reserve(s);
                     while (s-- != 0) {
-                        xs->push_back(api::unbox<T>(base->r(*in)));
+                        xs->insert(api::unbox<T>(base->r(*in)));
                     }
                 }
             }
@@ -44,7 +46,7 @@ namespace ogss {
                 if (0 != count) {
                     out.v64(count);
                     for (int i = 1; i <= count; i++) {
-                        auto xs = (api::Array<T> *) idMap[i];
+                        auto xs = (api::Set<T> *) idMap[i];
                         out.v64((int) xs->size());
                         for (T x : *xs) {
                             base->w(x, out);
@@ -56,16 +58,16 @@ namespace ogss {
             }
 
         public:
-            ArrayType(TypeID tid, uint32_t kcc, FieldType *const base)
+            SetType(TypeID tid, uint32_t kcc, FieldType *const base)
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}
 
             /// simplify code generation
-            inline api::Array<T> *read(streams::InStream &in) {
-                return (api::Array<T> *) r(in).array;
+            inline api::Set<T> *read(streams::InStream &in) {
+                return (api::Set<T> *) r(in).set;
             }
         };
     }
 }
 
 
-#endif //OGSS_TEST_CPP_ARRAYTYPE_H
+#endif //OGSS_TEST_CPP_LIST_TYPE_H

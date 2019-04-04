@@ -36,7 +36,7 @@ namespace ogss {
             /**
              * open the file at the target location
              */
-            FileInputStream(const std::string& path);
+            FileInputStream(const std::string &path);
 
             /**
              * close the stream
@@ -66,6 +66,13 @@ namespace ogss {
              */
             void jump(long offset) {
                 position = (uint8_t *) base + offset;
+            }
+
+            /**
+             * @return the number of bytes in this file.
+             */
+            size_t size() {
+                return (uint8_t *) end - (uint8_t *) base;
             }
         };
     }

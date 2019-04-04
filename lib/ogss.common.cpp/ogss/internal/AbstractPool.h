@@ -35,6 +35,10 @@ namespace ogss {
     namespace internal {
         class Creator;
 
+        class Parser;
+
+        class SeqParser;
+
         /**
          * this class reflects all storage pool properties, that do not depend on types
          *
@@ -157,14 +161,15 @@ namespace ogss {
             /**
              * Get the name of known sub pool with argument local id. Return null, if id is invalid.
              */
-            virtual String nameSub(int id) {
+            virtual String nameSub(uint32_t id) const {
                 return nullptr;
             }
 
             /**
              * Create the known sub pool with argument local id. Return null, if id is invalid.
              */
-            virtual AbstractPool *makeSub(int id, TypeID index) {
+            virtual AbstractPool *makeSub(uint32_t id, TypeID index,
+                                          std::unordered_set<TypeRestriction *> *restrictions) {
                 return nullptr;
             }
 
@@ -228,28 +233,32 @@ namespace ogss {
             /**
              * names of known fields, the actual field information is given in the generated addKnownFiled method.
              */
-            virtual String KFN(int id) {
+            virtual String KFN(uint32_t id) const {
                 return nullptr;
             }
 
             /**
              * construct the known field with the given id
              */
-            virtual FieldDeclaration *KFC(int id, FieldType **SIFA, TypeID nextFID) {
+            virtual FieldDeclaration *KFC(uint32_t id, FieldType **SIFA, TypeID nextFID) {
                 return nullptr;
             }
 
             api::Box r(streams::InStream &in) const final;
 
-            bool w(api::Box target, streams::BufferedOutStream *out) const final {
+            bool w(api::Box target, streams::BufferedOutStream &out) const final {
                 const auto v = target.anyRef;
                 if (v)
-                    out->v64(target.anyRef->id);
+                    out.v64(target.anyRef->id);
                 else
-                    out->i8(0);
+                    out.i8(0);
             }
 
             friend class Creator;
+
+            friend class Parser;
+
+            friend class SeqParser;
 
             friend class api::File;
 

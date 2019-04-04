@@ -27,7 +27,7 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
                 last = nullptr;
                 p = pb.make(nextID[0]++, index++);
             } else {
-                p = p->makeSub(nextID[THH]++, index++);
+                p = p->makeSub(nextID[THH]++, index++, nullptr);
             }
 
             SIFA[nsID++] = p;
@@ -63,7 +63,10 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
     {
         uint32_t kcc;
         for (int i = 0; -1u != (kcc = pb.kcc(i)); i++) {
-            HullType *r = pb.makeKCC(kcc);
+            uint32_t kkind = (kcc >> 30u) & 3u;
+            FieldType *kb1 = SIFA[kcc & 0x7FFFu];
+            FieldType *kb2 = 3 == kkind ? SIFA[(kcc >> 15u) & 0x7FFFu] : nullptr;
+            HullType *r = pb.makeContainer(kcc, tid++, kb1, kb2);
             SIFA[nsID++] = r;
             r->fieldID = nextFieldID++;
             containers.push_back(r);

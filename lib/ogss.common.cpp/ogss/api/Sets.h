@@ -27,7 +27,7 @@ namespace ogss {
          */
         struct BoxedSet {
 
-            virtual ~BoxedSet() { }
+            virtual ~BoxedSet() {}
 
             /**
              * b € this
@@ -56,7 +56,7 @@ namespace ogss {
                 const iter last;
 
             public:
-                BoxedIterator(Set *self) : state(self->begin()), last(self->end()) { }
+                BoxedIterator(Set *self) : state(self->begin()), last(self->end()) {}
 
                 virtual bool hasNext() const {
                     return state != last;
@@ -69,9 +69,9 @@ namespace ogss {
 
         public:
 
-            Set(size_t size) : std::unordered_set<T>(size) { }
+            Set() : std::unordered_set<T>() {}
 
-            virtual ~Set() { };
+            virtual ~Set() {};
 
             virtual bool contains(const Box &b) const {
                 return this->find(unbox<T>(b)) != this->end();

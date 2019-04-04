@@ -19,6 +19,7 @@ namespace ogss {
          * @author Timm Felden
          */
         class AutoField : public FieldDeclaration {
+        public:
             AutoField(const FieldType *const type, api::String const name,
                       const TypeID fieldID, AbstractPool *const owner)
                     : FieldDeclaration(type, name, fieldID, owner) {}

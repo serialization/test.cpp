@@ -23,7 +23,7 @@ namespace common {
      */
     template<typename T>
     ogss::api::Array<T> *array() {
-        return new ogss::api::Array<T>(0);
+        return new ogss::api::Array<T>();
     }
 
     /**
@@ -33,7 +33,7 @@ namespace common {
      */
     template<typename T>
     ogss::api::Set<T> *set() {
-        return new ogss::api::Set<T>(0);
+        return new ogss::api::Set<T>();
     }
 
     /**

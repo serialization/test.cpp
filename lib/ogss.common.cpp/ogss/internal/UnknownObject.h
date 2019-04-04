@@ -15,7 +15,13 @@ namespace ogss {
         template<class T>
         class Book;
 
-        class UnknownObject : public api::Object, public api::NamedObj {
+        template<class T>
+        class Pool;
+
+        template<class T>
+        class SubPool;
+
+        class UnknownObject final : public api::Object, public api::NamedObj {
 
             //! bulk allocation constructor
             UnknownObject() : api::NamedObj(nullptr) {};
@@ -25,7 +31,15 @@ namespace ogss {
 
             friend class Book<UnknownObject>;
 
+            friend class Pool<UnknownObject>;
+
+            friend class SubPool<UnknownObject>;
+
         public:
+
+            TypeID stid() const final {
+                return -1;
+            }
 
             virtual void prettyString(std::ostream &os) const {
                 os << *this->pool->name << "#" << id << "(unknown)";

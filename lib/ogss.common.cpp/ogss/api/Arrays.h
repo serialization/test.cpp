@@ -19,7 +19,7 @@ namespace ogss {
          * @note representation is always a std::vector
          */
         struct BoxedArray {
-            virtual ~BoxedArray() { }
+            virtual ~BoxedArray() {}
 
             /**
              * get boxed value at position i
@@ -50,9 +50,9 @@ namespace ogss {
         template<typename T>
         struct Array : public std::vector<T>, public BoxedArray {
 
-            Array(size_t length) : std::vector<T>(length) { }
+            Array() : std::vector<T>() {}
 
-            virtual ~Array() { }
+            virtual ~Array() {}
 
             virtual Box get(size_t i) const {
                 return box(this->at(i));
