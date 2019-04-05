@@ -67,7 +67,6 @@ ogss::internal::Parser::Parser(
         const std::string &path, FileInputStream *in, const PoolBuilder &pb)
         : StateInitializer(path, in, pb),
           pb(pb), fields(), fdts() {
-    parseFile(in);
 }
 
 void ogss::internal::Parser::ParseException(ogss::InStream *in, const std::string &msg) {
@@ -79,10 +78,11 @@ void ogss::internal::Parser::typeDefinitions() {
     int THH = 0;
     // the index of the next known class at index THH
     int nextID[50];
+    nextID[0] = 0;
     // the nextName, null if there is no next PD
     String nextName = pb.name(0);
 
-    AbstractPool *p, *last;
+    AbstractPool *p = nullptr, *last;
     AbstractPool *result;
 
     // Name of all seen class names to prevent duplicate allocation of the same pool.

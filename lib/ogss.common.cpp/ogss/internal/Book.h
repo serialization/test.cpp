@@ -17,6 +17,8 @@ namespace ogss {
          */
         template<class T>
         class Book {
+            // TODO static_assert(sizeof(T*) <= sizeof(T), "T is too small for Books");
+            //! @todo optimize to T*
             std::vector<T *> freelist;
             //! @invariant: if not current page then, T is used or T is in freeList
             std::vector<T *> pages;

@@ -53,6 +53,18 @@ String internal::StringPool::add(const char *target, int length) {
     }
 }
 
+void internal::StringPool::loadLazyData() {
+    if (!in)
+        return;
+
+    for (ObjectID i = 1; i < idMap.size(); i++) {
+        if (!idMap[i])
+            byID(i);
+    }
+
+    in = nullptr;
+}
+
 
 size_t internal::StringPool::S(int count, ogss::streams::InStream *in) {
     if (0 == count)
@@ -97,6 +109,31 @@ size_t internal::StringPool::S(int count, ogss::streams::InStream *in) {
 void internal::StringPool::read() {
     // TODO broken architecture?
     throw std::logic_error("dead_code");
+}
+
+
+void internal::StringPool::writeLiterals(StringPool *const sp, ogss::streams::FileOutputStream *out) {
+    // count
+    // @note idMap access performance hack
+    sp->hullOffset = sp->idMap.size();
+    const int count = sp->hullOffset - 1;
+    out->v64(count);
+
+    // @note idMap access performance hack
+    if (0 != count) {
+
+        // lengths
+        int i = 0;
+        while (i < count) {
+            out->v64((int) sp->idMap[++i]->size());
+        }
+
+        // data
+        i = 0;
+        while (i < count) {
+            out->put(sp->idMap[++i]);
+        }
+    }
 }
 
 bool internal::StringPool::write(ogss::streams::BufferedOutStream &out) {

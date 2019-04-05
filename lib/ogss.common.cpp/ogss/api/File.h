@@ -91,10 +91,10 @@ namespace ogss {
 
             /**
              * the file we read from
-             * @note null, iff no file was read
+             * @note null, iff no file was read, or it has been closed already
              * @note owned by this
              */
-            streams::FileInputStream *const fromFile;
+            streams::FileInputStream *fromFile;
 
             /**
              * our current path to write to
@@ -201,29 +201,7 @@ namespace ogss {
             /**
              * Force all lazy string and field data to be loaded from disk.
              */
-            void loadLazyData() {
-                // TODO
-                //                // check if the file input stream is still open
-                //                if (null == input)
-                //                    return;
-                //
-                //                // ensure that strings are loaded
-                //                strings.loadLazyData();
-                //
-                //                // ensure that lazy fields have been loaded
-                //                for (Pool<?> p : classes)
-                //                for (FieldDeclaration<?, ?> f : p.dataFields)
-                //                if (f instanceof LazyField<?, ?>)
-                //                ((LazyField<?, ?>) f).ensureLoaded();
-                //
-                //                // close the file input stream and ensure that it is not read again
-                //                try {
-                //                    input.close();
-                //                } catch (IOException e) {
-                //                    throw new RuntimeException("internal error", e);
-                //                }
-                //                input = null;
-            }
+            void loadLazyData();
 
             /**
              * Write changes to disk.

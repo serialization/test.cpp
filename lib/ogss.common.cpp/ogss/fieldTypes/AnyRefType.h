@@ -40,10 +40,6 @@ namespace ogss {
                     : fdts(fdts), owner(nullptr) {}
 
             virtual ~AnyRefType() {
-                if (!owner)
-                    for (auto p : *fdts)
-                        delete p;
-                delete fdts;
             }
 
             api::Box r(streams::InStream &in) const final {

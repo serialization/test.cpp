@@ -2,10 +2,11 @@
 // Created by Timm Felden on 04.11.15.
 //
 
-#include "File.h"
 #include "../fieldTypes/AnyRefType.h"
-#include "../streams/FileOutputStream.h"
 #include "../internal/StateInitializer.h"
+#include "../internal/Writer.h"
+#include "../streams/FileOutputStream.h"
+#include "File.h"
 
 #include <atomic>
 #include <iostream>
@@ -111,12 +112,35 @@ void File::changeMode(WriteMode newMode) {
 }
 
 
+void File::loadLazyData() {
+    // check if the file input stream is still open
+    if (!fromFile)
+        return;
+
+    // ensure that strings are loaded
+    ((StringPool *) strings)->loadLazyData();
+
+    // TODO
+    //                // ensure that lazy fields have been loaded
+    //                for (Pool<?> p : classes)
+    //                for (FieldDeclaration<?, ?> f : p.dataFields)
+    //                if (f instanceof LazyField<?, ?>)
+    //                ((LazyField<?, ?>) f).ensureLoaded();
+    //
+
+    // close the file input stream and ensure that it is not read again
+    delete fromFile;
+    fromFile = nullptr;
+}
+
 void File::flush() {
     if (!canWrite)
         throw std::invalid_argument("this file is read-only");
 
-    SK_TODO;
-    // TODO FileWriter::write(this, currentPath());
+    loadLazyData();
+
+    streams::FileOutputStream out(currentPath());
+    internal::Writer write(this, out);
 }
 
 void File::close() {

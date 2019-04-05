@@ -8,6 +8,8 @@
 #include "PoolBuilder.h"
 #include "StateInitializer.h"
 #include "../streams/InStream.h"
+#include "StringPool.h"
+
 
 namespace ogss {
     namespace internal {
@@ -22,6 +24,9 @@ namespace ogss {
          */
         class Parser : public StateInitializer {
 
+            /**
+             * This method is a workaround for C++ bullshit elaboration order during object construction
+             */
             void parseFile(FileInputStream *in);
 
             /**
@@ -64,6 +69,8 @@ namespace ogss {
             void readFields(AbstractPool *p);
 
             virtual void processData() = 0;
+
+            friend struct StateInitializer;
         };
     }
 }

@@ -21,6 +21,8 @@ namespace ogss {
 
         class Parser;
 
+        class Writer;
+
         /**
          * Implementation of all string handling.
          *
@@ -122,6 +124,11 @@ namespace ogss {
                 }
             }
 
+            /**
+             * Ensure that all Strings have been read.
+             */
+            void loadLazyData();
+
         private:
 
             /**
@@ -136,6 +143,8 @@ namespace ogss {
             /// id offset of the actual hull (this type also has two areas where instances are stored)
             int hullOffset;
 
+            static void writeLiterals(StringPool *const sp, ogss::streams::FileOutputStream *out);
+
             bool write(ogss::streams::BufferedOutStream &) final;
 
             void allocateInstances(int, ogss::streams::MappedInStream *) final;
@@ -143,6 +152,8 @@ namespace ogss {
             friend class Parser;
 
             friend class StateInitializer;
+
+            friend class Writer;
         };
     }
 }

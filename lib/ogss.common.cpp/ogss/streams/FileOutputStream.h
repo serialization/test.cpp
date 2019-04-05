@@ -7,6 +7,7 @@
 
 #include <string>
 #include <assert.h>
+#include <cstring>
 #include "Stream.h"
 #include "../api/String.h"
 
@@ -14,6 +15,7 @@ namespace ogss {
     namespace streams {
 
         class MappedOutStream;
+
         class BufferedOutStream;
 
         /**
@@ -58,7 +60,7 @@ namespace ogss {
              *
              * @param append set to true, if content shall be appended to the file
              */
-            FileOutputStream(const std::string &path, bool append);
+            FileOutputStream(const std::string &path);
 
             /**
              * close the stream
@@ -100,29 +102,21 @@ namespace ogss {
 
             inline void i16(int16_t v) {
                 require(2);
-                *(position++) = (uint8_t) (v >> 8);
-                *(position++) = (uint8_t) v;
+                std::memcpy(position, &v, 2);
+                position += 2;
             }
 
             inline void i32(int32_t v) {
                 require(4);
-                *(position++) = (uint8_t) (v >> 24);
-                *(position++) = (uint8_t) (v >> 16);
-                *(position++) = (uint8_t) (v >> 8);
-                *(position++) = (uint8_t) v;
+                std::memcpy(position, &v, 4);
+                position += 4;
             }
 
             inline void i64(int64_t p) {
                 auto v = ::ogss::unsign(p);
                 require(8);
-                *(position++) = (uint8_t) (v >> 56u);
-                *(position++) = (uint8_t) (v >> 48u);
-                *(position++) = (uint8_t) (v >> 40u);
-                *(position++) = (uint8_t) (v >> 32u);
-                *(position++) = (uint8_t) (v >> 24u);
-                *(position++) = (uint8_t) (v >> 16u);
-                *(position++) = (uint8_t) (v >> 8u);
-                *(position++) = (uint8_t) v;
+                std::memcpy(position, &v, 8);
+                position += 8;
             }
 
             inline void v64(int64_t p) {

@@ -28,6 +28,8 @@ StateInitializer *StateInitializer::make(
             SK_TODO + "par parser";
         //        else
         //            init = new ParParser(path, fs, pb);
+
+        ((Parser *) init)->parseFile(fs);
     }
     init->canWrite = 0 == (mode & api::WriteMode::readOnly);
     return init;

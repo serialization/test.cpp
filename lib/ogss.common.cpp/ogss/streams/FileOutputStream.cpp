@@ -10,15 +10,17 @@
 #include "MappedOutStream.h"
 #include "../api/Exception.h"
 
-ogss::streams::FileOutputStream::FileOutputStream(const std::string &path, bool append)
+ogss::streams::FileOutputStream::FileOutputStream(const std::string &path)
         : Stream(&buffer, (void *) (((long) &buffer) + BUFFER_SIZE)),
-          path(path), file(fopen(path.c_str(), append ? "ra+" : "w+")),
+          path(path), file(fopen(path.c_str(), "w+")),
           bytesWriten(0) {
     if (nullptr == file)
         throw Exception(std::string("could not open file ") + path);
 }
 
 ogss::streams::FileOutputStream::~FileOutputStream() {
+    // TODO remove
+    flush();
     fclose(file);
 }
 
