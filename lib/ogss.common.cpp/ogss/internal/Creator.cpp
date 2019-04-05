@@ -19,6 +19,7 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
         // the index of the next known class at index THH
         // @note to self: in C++ this should be string*[32]
         int nextID[50];
+        nextID[0] = 0;
         String nextName = pb.name(0);
 
         AbstractPool *p = nullptr, *last = nullptr;
@@ -32,7 +33,6 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
 
             SIFA[nsID++] = p;
             classes.push_back(p);
-            Strings->addLiteral(p->name);
 
             // set next
             if (last) {
@@ -97,7 +97,6 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
     for (AbstractPool *p : classes) {
         String f;
         for (int i = 0; (f = p->KFN(i)); i++) {
-            Strings->addLiteral(f);
 
             FieldDeclaration *const fd = p->KFC(i, SIFA, nextFieldID);
 

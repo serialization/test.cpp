@@ -79,7 +79,7 @@ TEST(AgeReadTest, ReadAgeCheckTypes) {
             File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
     ASSERT_EQ(1, (int) sf->size());
     for (auto t : *sf) {
-        ASSERT_EQ(age::internal::SK::Age, t->name);
+        ASSERT_EQ(age::internal::SK.Age, t->name);
     }
 }
 

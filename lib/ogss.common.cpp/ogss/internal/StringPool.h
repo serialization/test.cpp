@@ -11,12 +11,14 @@
 
 #include "../api/StringAccess.h"
 #include "../streams/FileInputStream.h"
+#include "AbstractStringKeeper.h"
 
 namespace ogss {
 
     using namespace api;
     namespace internal {
         class StateInitializer;
+
         class Parser;
 
         /**
@@ -37,10 +39,11 @@ namespace ogss {
              * improving the performance of hash containers and name checks:)
              */
             mutable std::unordered_set<String, equalityHash, equalityEquals> knownStrings;
+
             /**
              * Strings known at compile time. Literals are not deleted and cannot be removed from a pool.
              */
-            std::unordered_set<String, equalityHash, equalityEquals> literals;
+            const AbstractStringKeeper *const literals;
 
             /**
              * get string by ID
@@ -60,7 +63,7 @@ namespace ogss {
              */
             ObjectID lastID;
 
-            StringPool(streams::FileInputStream *in);
+            StringPool(streams::FileInputStream *in, const AbstractStringKeeper *sk);
 
             virtual ~StringPool();
 
@@ -78,20 +81,11 @@ namespace ogss {
              */
             virtual String add(const char *target, int length);
 
-            /**
-             * add a literal string to the pool. This has the fancy property, that the address of a
-             * string obtained from file is known, as it will be replaced by target.
-             *
-             * @note this wont work, if the string is already known!
-             */
-            virtual void addLiteral(String target);
-
             api::Box get(ObjectID ID) const {
                 api::Box r;
                 r.string = byID(ID);
                 return r;
             }
-
 
             /**
              * search a string by id it had inside of the read file, may block if the string has not yet been read
@@ -147,6 +141,7 @@ namespace ogss {
             void allocateInstances(int, ogss::streams::MappedInStream *) final;
 
             friend class Parser;
+
             friend class StateInitializer;
         };
     }

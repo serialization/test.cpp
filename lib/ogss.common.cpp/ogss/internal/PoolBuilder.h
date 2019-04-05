@@ -7,6 +7,7 @@
 
 #include "../api/types.h"
 #include "../fieldTypes/FieldType.h"
+#include "AbstractStringKeeper.h"
 
 namespace ogss {
     namespace fieldTypes {
@@ -25,7 +26,7 @@ namespace ogss {
             /**
              * Pool is initialized with all type and field names.
              */
-            virtual void initialize(StringPool *pool) const = 0;
+            virtual const AbstractStringKeeper *getSK() const = 0;
 
 
             /**

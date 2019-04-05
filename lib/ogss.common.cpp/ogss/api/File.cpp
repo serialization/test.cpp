@@ -26,7 +26,7 @@ File::File(internal::StateInitializer *init)
           enums(nullptr),
           TBN(nullptr),
           fromFile(init->in.release()),
-          currentWritePath(fromFile->getPath()),
+          currentWritePath(init->path),
           canWrite(init->canWrite),
           SIFA({}) {
 

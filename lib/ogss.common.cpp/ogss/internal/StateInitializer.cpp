@@ -37,13 +37,12 @@ StateInitializer::StateInitializer(const std::string &path, FileInputStream *in,
                                    const PoolBuilder &pb)
         : path(path), in(in), canWrite(true),
           guard(),
-          Strings(new StringPool(in)),
+          Strings(new StringPool(in, pb.getSK())),
           classes(), containers(), enums(), AnyRef(new AnyRefType(&classes)),
           SIFA(new FieldType *[pb.sifaSize]),
           sifaSize(pb.sifaSize),
           nsID(10),
           nextFieldID(1) {
-    pb.initialize(Strings);
 
     SIFA[0] = (FieldType *) &BoolType;
     SIFA[1] = (FieldType *) &I8;

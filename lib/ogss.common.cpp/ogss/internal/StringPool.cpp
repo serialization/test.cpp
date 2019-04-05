@@ -4,19 +4,29 @@
 
 #include <assert.h>
 #include "StringPool.h"
+#include "AbstractStringKeeper.h"
 
 using namespace ogss;
 using api::String;
 
-internal::StringPool::StringPool(streams::FileInputStream *in)
-        : StringAccess(9), in(in), knownStrings(), idMap(), positions(nullptr), lastID(0) {
+internal::StringPool::StringPool(streams::FileInputStream *in, const AbstractStringKeeper *sk)
+        : StringAccess(9), in(in), knownStrings(), literals(sk),
+          idMap(), positions(nullptr), lastID(0) {
     idMap.push_back(nullptr);
+
+    knownStrings.reserve(sk->size);
+    for (ObjectID i = 0; i < sk->size; i++)
+        knownStrings.insert(sk->strings[i]);
 }
 
 internal::StringPool::~StringPool() {
+    // remove literals from knownStrings
+    for (ObjectID i = 0; i < literals->size; i++)
+        knownStrings.erase(literals->strings[i]);
+
+    // delete remaining knownStrings
     for (auto s : knownStrings)
-        if (literals.find(s) == literals.end())
-            delete s;
+        delete s;
 }
 
 String internal::StringPool::add(const char *target) {
@@ -41,15 +51,6 @@ String internal::StringPool::add(const char *target, int length) {
         knownStrings.insert(result);
         return result;
     }
-}
-
-void internal::StringPool::addLiteral(String target) {
-    // note to self: if this fails, we have to insert pb.name before advancing in the file!
-    // note to self2: this can still fail, if we read an unknown type with the name of a known field
-    assert(knownStrings.find(target) == knownStrings.end());
-
-    knownStrings.insert(target);
-    literals.insert(target);
 }
 
 
