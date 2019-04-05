@@ -36,7 +36,7 @@ namespace ogss {
             /**
              * This buffer provides the association of file fieldID to field.
              */
-            std::vector<void *> fields;
+            std::vector<RTTIBase *> fields;
 
             /**
              * File defined types. This array is used to resolve type IDs while parsing. The type IDs assigned to created

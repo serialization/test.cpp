@@ -9,6 +9,7 @@
 
 namespace ogss {
     namespace internal {
+        class SeqReadTask;
 
         /**
          * A field that is associated with data stored in a file.
@@ -34,6 +35,8 @@ namespace ogss {
               * @return true iff the written data contains default values only
               */
             virtual bool write(int i, int last, streams::BufferedOutStream &out) const = 0;
+
+            friend class SeqReadTask;
         };
 
     }

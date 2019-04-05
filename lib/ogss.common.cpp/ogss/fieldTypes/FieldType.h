@@ -6,10 +6,11 @@
 #define SKILL_CPP_COMMON_FIELDTYPE_H
 
 #include "../common.h"
-#include "../streams/MappedInStream.h"
 #include "../api/Box.h"
-#include "../streams/MappedOutStream.h"
+#include "../internal/RTTIBase.h"
 #include "../streams/BufferedOutStream.h"
+#include "../streams/MappedInStream.h"
+#include "../streams/MappedOutStream.h"
 
 namespace ogss {
     namespace streams {
@@ -26,13 +27,13 @@ namespace ogss {
          *  @author Timm Felden
          *  @note field types have a mental type T that represents the base type of the field
          */
-        class FieldType {
+        class FieldType : public internal::RTTIBase {
 
         protected:
-            FieldType(const TypeID typeID) : typeID(typeID) { }
+            FieldType(const TypeID typeID) : typeID(typeID) {}
 
         public:
-            virtual ~FieldType() { }
+            virtual ~FieldType() {}
 
             //! the id of this type
             const TypeID typeID;

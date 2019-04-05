@@ -3,16 +3,49 @@
 //
 
 #include "SeqParser.h"
+#include "LazyField.h"
 
 using namespace ogss::internal;
+
+namespace ogss {
+    namespace internal {
+        class SeqReadTask final : public RTTIBase {
+            DataField *const f;
+
+            streams::MappedInStream *const map;
+
+        public:
+            SeqReadTask(DataField *f, streams::MappedInStream *in)
+                    : f(f), map(in) {}
+
+            ~SeqReadTask() {
+                delete map;
+            }
+
+            void run() {
+                AbstractPool *const owner = f->owner;
+                const int bpo = owner->bpo;
+                const int end = bpo + owner->cachedSize;
+
+                if (map->eof()) {
+                    // TODO default initialization; this is a nop for now in Java
+                } else {
+                    f->read(bpo, end, *map);
+                }
+
+                if (!map->eof() && !(dynamic_cast<LazyField *>(f)))
+                    throw std::out_of_range("read task did not consume InStream");
+            }
+        };
+    }
+}
+
 
 SeqParser::SeqParser(const std::string &path, streams::FileInputStream *in, const PoolBuilder &pb)
         : Parser(path, in, pb) {
 }
 
 void SeqParser::typeBlock() {
-
-
     /**
      * *************** * T Class * ****************
      */
@@ -66,5 +99,53 @@ void SeqParser::typeBlock() {
      */
     for (AbstractPool *p : classes) {
         readFields(p);
+    }
+}
+
+void SeqParser::processData() {
+    // we expect one HD-entry per field
+    int remaining = fields.size();
+    std::vector<RTTIBase *> jobs;
+    jobs.reserve(remaining);
+
+    while ((--remaining >= 0) & !in->eof()) {
+        // create the map directly and use it for subsequent read-operations to avoid costly position and size
+        // readjustments
+        streams::MappedInStream *const map = in->jumpAndMap(in->v32() + 2);
+
+        const int id = map->v32();
+        RTTIBase *const f = fields.at(id);
+        // overwrite entry to prevent duplicate read of the same field
+        fields[id] = nullptr;
+
+        if (auto p = dynamic_cast<HullType *>(f)) {
+            const int count = map->v32();
+
+            // start hull allocation job
+            p->allocateInstances(count, map);
+
+            // create hull read data task except for StringPool which is still lazy per element and eager per offset
+            if (!dynamic_cast<StringPool *>(p)) {
+                jobs[id] = p;
+            }
+
+        } else if (auto fd = dynamic_cast<DataField *>(f)) {
+            // create job with adjusted size that corresponds to the * in the specification (i.e. exactly the data)
+            jobs[id] = new SeqReadTask(fd, map);
+        } else {
+            ParseException(in.get(), "created the same read job twice");
+        }
+    }
+
+    // perform read tasks
+    for (auto j : jobs) {
+        if (j) {
+            if (auto rt = dynamic_cast<SeqReadTask *>(j)) {
+                rt->run();
+                delete rt;
+            } else if (auto ht = dynamic_cast<HullType *>(j)) {
+                ht->read();
+            }
+        }
     }
 }

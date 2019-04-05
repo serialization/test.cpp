@@ -54,6 +54,10 @@ bool DistributedField::write(int i, const int last, streams::BufferedOutStream &
     //    }
 }
 
+void DistributedField::read(int i, int last, streams::MappedInStream &in) const {
+    SK_TODO;
+}
+
 /**
  * @note this method is invoked _before_ object IDs get reassigned!
  *

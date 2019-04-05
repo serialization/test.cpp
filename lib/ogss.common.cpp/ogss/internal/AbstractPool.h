@@ -39,6 +39,8 @@ namespace ogss {
 
         class SeqParser;
 
+        class SeqReadTask;
+
         /**
          * this class reflects all storage pool properties, that do not depend on types
          *
@@ -259,6 +261,8 @@ namespace ogss {
             friend class Parser;
 
             friend class SeqParser;
+
+            friend class SeqReadTask;
 
             friend class api::File;
 

@@ -2,14 +2,16 @@
 // Created by Timm Felden on 03.04.19.
 //
 
+#include "LazyField.h"
 #include "Parser.h"
-#include "UnknownObject.h"
 #include "SubPool.h"
+#include "UnknownObject.h"
+
 #include "../fieldTypes/AnyRefType.h"
 #include "../fieldTypes/ArrayType.h"
 #include "../fieldTypes/ListType.h"
-#include "../fieldTypes/SetType.h"
 #include "../fieldTypes/MapType.h"
+#include "../fieldTypes/SetType.h"
 
 
 void ogss::internal::Parser::parseFile(FileInputStream *in) {
@@ -429,4 +431,85 @@ void ogss::internal::Parser::TEnum() {
         //        enums.add(new EnumPool(tid++, nextName, null, pb.enumMake(ki++)));
         //        nextName = pb.enumName(ki);
     }
+}
+
+void ogss::internal::Parser::readFields(ogss::AbstractPool *p) {
+    // C++ bullshit ;)
+    api::ogssLess compare;
+
+    // we have not yet seen a known field
+    int ki = 0;
+
+    // we pass the size by adding null's for each expected field in the stream because AL.clear does not return
+    // its backing array, i.e. we will likely not resize it that way
+    int idx = p->dataFields.size();
+
+    p->dataFields.clear();
+    String kfn = p->KFN(0);
+    while (0 != idx--) {
+        // read field
+        const String name = Strings->r(*in).string;
+        FieldType *t = fieldType();
+        // TODO HashSet<FieldRestriction<?>> rest = fieldRestrictions(t);
+        FieldDeclaration *f = nullptr;
+
+        while ((kfn = p->KFN(ki))) {
+            // is it the next known field?
+            if (name == kfn) {
+                if (dynamic_cast<AutoField *>(f = p->KFC(ki++, SIFA, nextFieldID)))
+                    ParseException(in.get(), std::string("Found transient field ") +
+                                             *p->name + "." + *name + " in the file.");
+
+                if (f->type != t)
+                    ParseException(in.get(), std::string("Field ") +
+                                             *p->name + "." + *name +
+                                             " should have type " + std::to_string(f->type->typeID)
+                                             + " but has type " + std::to_string(t->typeID));
+
+                break;
+            }
+
+            // else, it might be an unknown field
+            if (compare(name, kfn)) {
+                // create unknown field
+                f = new LazyField(t, name, nextFieldID, p);
+                break;
+            }
+
+            // else, it is a known field not contained in the file
+            f = p->KFC(ki++, SIFA, nextFieldID);
+            if (!dynamic_cast<AutoField *>(f)) {
+                nextFieldID++;
+
+                // increase maxDeps
+                if (auto ft = dynamic_cast<const fieldTypes::HullType *>(f->type)) {
+                    const_cast<fieldTypes::HullType *>(ft)->maxDeps++;
+                }
+            }
+            f = nullptr;
+        }
+
+        if (!f) {
+            // no known fields left, so it is obviously unknown
+            f = new LazyField(t, name, nextFieldID, p);
+        }
+
+        nextFieldID++;
+
+        // increase maxDeps
+        if (auto ft = dynamic_cast<const fieldTypes::HullType *>(f->type)) {
+            const_cast<fieldTypes::HullType *>(ft)->maxDeps++;
+        }
+
+        // TODO f.addRestriction(rest);
+
+        fields.push_back(f);
+    }
+
+    // create remaining auto fields
+    if (kfn)
+        do {
+            // nextID wont be used anyway
+            p->KFC(ki, SIFA, 0);
+        } while (p->KFN(++ki));
 }

@@ -22,7 +22,7 @@ namespace ogss {
 
             void processData() final;
 
-            friend class StateInitializer;
+            friend struct StateInitializer;
         };
     }
 }

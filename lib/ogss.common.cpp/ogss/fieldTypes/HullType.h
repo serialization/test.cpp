@@ -18,6 +18,7 @@ namespace ogss {
         class Creator;
 
         class Parser;
+        class SeqParser;
     }
     namespace fieldTypes {
         class AnyRefType;
@@ -153,8 +154,10 @@ namespace ogss {
             friend class internal::Creator;
 
             friend class internal::Parser;
+            friend class internal::SeqParser;
 
             friend class internal::StateInitializer;
+
         };
     }
 }

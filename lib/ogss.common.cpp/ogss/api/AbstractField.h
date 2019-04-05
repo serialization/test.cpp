@@ -8,6 +8,7 @@
 #include "String.h"
 #include "Box.h"
 #include "../fieldTypes/FieldType.h"
+#include "../internal/RTTIBase.h"
 
 namespace ogss {
     using fieldTypes::FieldType;
@@ -17,7 +18,7 @@ namespace ogss {
          *
          * @author Timm Felden
          */
-        class AbstractField {
+        class AbstractField : public internal::RTTIBase {
         protected:
             AbstractField(const FieldType *const type, String const name)
                     : type(type), name(name) {}
