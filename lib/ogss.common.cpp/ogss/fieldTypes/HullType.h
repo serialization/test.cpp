@@ -5,8 +5,11 @@
 #ifndef SKILL_CPP_COMMON_HULLTYPE_H
 #define SKILL_CPP_COMMON_HULLTYPE_H
 
+#include <atomic>
+#include <mutex>
 #include <vector>
 #include <unordered_map>
+
 #include "FieldType.h"
 #include "../streams/BufferedOutStream.h"
 #include "../streams/InStream.h"
@@ -18,12 +21,19 @@ namespace ogss {
         class Creator;
 
         class Parser;
+
         class SeqParser;
+
+        class Writer;
     }
     namespace fieldTypes {
         class AnyRefType;
 
         class HullType : public FieldType {
+        protected:
+            //! guard parallel update to maps
+            mutable std::mutex mapLock;
+
             /**
              * get an instance by its ID
              *
@@ -49,7 +59,7 @@ namespace ogss {
              * @note If another field reduces deps to 0 it has to start a write job for this type.
              * @note This is in essence reference counting on an acyclic graph while writing data to disk.
              */
-            int deps = 0;
+            std::atomic<int> deps;
 
             /**
              * The maximal, i.e. static, number of serialized fields depending on this type.
@@ -103,7 +113,8 @@ namespace ogss {
             virtual bool write(streams::BufferedOutStream &out) = 0;
 
 
-            explicit HullType(TypeID tid, uint32_t kcc) : FieldType(tid), kcc(kcc), idMap(), IDs() {
+            explicit HullType(TypeID tid, uint32_t kcc)
+            : FieldType(tid), mapLock(), kcc(kcc), deps(0), idMap(), IDs() {
                 idMap.push_back(nullptr);
             }
 
@@ -118,8 +129,9 @@ namespace ogss {
                     return 0;
 
                 ObjectID r;
-#pragma omp critical
                 {
+                    std::lock_guard<std::mutex> readLock(mapLock);
+
                     ObjectID &rval = IDs[ref];
                     if (!rval) {
                         rval = idMap.size();
@@ -149,15 +161,22 @@ namespace ogss {
 
             virtual void allocateInstances(int count, streams::MappedInStream *map) = 0;
 
+            /**
+             * Write the TCo declaration for this type
+             */
+            virtual void writeDecl(streams::BufferedOutStream &out) const {}
+
             friend class AnyRefType;
 
             friend class internal::Creator;
 
             friend class internal::Parser;
+
             friend class internal::SeqParser;
 
             friend class internal::StateInitializer;
 
+            friend class internal::Writer;
         };
     }
 }

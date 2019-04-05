@@ -24,6 +24,7 @@ ogss::internal::AbstractPool::AbstractPool(
           super(superPool),
           base(superPool ? superPool->base : this),
           THH(superPool ? superPool->THH + 1 : 0),
+          next(nullptr),
           dataFields(),
           afCount(afCount),
           autoFields(afCount ? new AutoField *[afCount] : noAutoFields) {

@@ -52,7 +52,7 @@ namespace ogss {
                       second(false) {
 
                 // mode switch, if no values obtained from data
-                if (index == last) {
+                if ((index == last) | (nullptr == p->data)) {
                     second = true;
                     while (this->p) {
                         if ((last = ((Pool<T> *) this->p)->newObjects.size())) {

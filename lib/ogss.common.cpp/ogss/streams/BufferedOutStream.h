@@ -58,12 +58,14 @@ namespace ogss {
              */
             void flush();
 
-            inline void require(size_t i) {
-                if (current.end - current.begin >= i)
+            inline void require(int i) {
+                if ((int)(current.end - current.begin) < i)
                     flush();
             }
 
         public:
+            BufferedOutStream() : bytesWriten(0), current({nullptr, nullptr, 0}), off(7), completed() {}
+
             /**
              * Release buffered memory owned by this stream
              */

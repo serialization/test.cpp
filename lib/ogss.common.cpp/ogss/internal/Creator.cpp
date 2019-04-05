@@ -12,9 +12,10 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
         : StateInitializer(path, nullptr, pb) {
     guard.reset(new std::string());
 
+    ogss::TypeID tid = 10 + classes.size();
+
     // Create Classes
     {
-        int index = 0;
         int THH = 0;
         // the index of the next known class at index THH
         // @note to self: in C++ this should be string*[32]
@@ -26,9 +27,9 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
         while (nextName) {
             if (0 == THH) {
                 last = nullptr;
-                p = pb.make(nextID[0]++, index++);
+                p = pb.make(nextID[0]++, tid++);
             } else {
-                p = p->makeSub(nextID[THH]++, index++, nullptr);
+                p = p->makeSub(nextID[THH]++, tid++, nullptr);
             }
 
             SIFA[nsID++] = p;
@@ -59,7 +60,6 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
     }
 
     // Execute known container constructors
-    ogss::TypeID tid = 10 + classes.size();
     {
         uint32_t kcc;
         for (int i = 0; -1u != (kcc = pb.kcc(i)); i++) {

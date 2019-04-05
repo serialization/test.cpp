@@ -9,8 +9,11 @@
 #include "FileOutputStream.h"
 #include "MappedOutStream.h"
 #include "../api/Exception.h"
+#include "BufferedOutStream.h"
 
-ogss::streams::FileOutputStream::FileOutputStream(const std::string &path)
+using namespace ogss::streams;
+
+FileOutputStream::FileOutputStream(const std::string &path)
         : Stream(&buffer, (void *) (((long) &buffer) + BUFFER_SIZE)),
           path(path), file(fopen(path.c_str(), "w+")),
           bytesWriten(0) {
@@ -18,13 +21,13 @@ ogss::streams::FileOutputStream::FileOutputStream(const std::string &path)
         throw Exception(std::string("could not open file ") + path);
 }
 
-ogss::streams::FileOutputStream::~FileOutputStream() {
+FileOutputStream::~FileOutputStream() {
     // TODO remove
     flush();
     fclose(file);
 }
 
-void ogss::streams::FileOutputStream::flush() {
+void FileOutputStream::flush() {
     // prevent double flushs
     if (base != position) {
         fwrite(base, 1, position - (uint8_t *) base, file);
@@ -33,39 +36,17 @@ void ogss::streams::FileOutputStream::flush() {
     }
 }
 
-ogss::streams::MappedOutStream *ogss::streams::FileOutputStream::jumpAndMap(long length) {
-    flush();
+void FileOutputStream::write(BufferedOutStream *out) {
+    if (base != position)
+        flush();
 
-    // advance file position
-    fseek(file, length, SEEK_CUR);
-    bytesWriten += length;
-
-    // create map
-    void *rval = mmap(NULL, bytesWriten, PROT_READ | PROT_WRITE, MAP_SHARED, fileno(file), 0);
-
-    if (MAP_FAILED == rval) {
-        fprintf(stderr, "mmap.c: %s\n errno was: %s\n", "failed to create write map", strerror(errno));
-        return NULL;
+    // write completed buffers
+    for (BufferedOutStream::Buffer &data : out->completed) {
+        // there is no need to distinguish wrapped from buffered data here
+        int size = std::abs(data.size);
+        fwrite(data.begin, 1, size, file);
+        bytesWriten -= data.size;
     }
 
-    if (-1 == posix_madvise(rval, length, MADV_SEQUENTIAL | MADV_WILLNEED)) {
-        fprintf(stderr, "mmap.c: %s\n errno was: %s\n", "failed to advise write map", strerror(errno));
-        return NULL;
-    }
-
-    // resize file
-    if (ftruncate(fileno(file), bytesWriten)) {
-        fprintf(stderr, "mmap.c: %s\n errno was: %s\n", "failed to resize file", strerror(errno));
-        return NULL;
-    }
-
-    auto map = new MappedOutStream(rval, (void *) (((long) rval) + bytesWriten));
-    map->position = &((uint8_t *) rval)[bytesWriten - length];
-    return map;
-}
-
-void ogss::streams::FileOutputStream::unmap(ogss::streams::MappedOutStream *map) {
-    msync(map->base, (size_t) map->end - (size_t) map->base, MS_ASYNC);
-    munmap(map->base, (size_t) map->end - (size_t) map->base);
-    delete map;
+    delete out;
 }

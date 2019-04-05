@@ -79,21 +79,14 @@ namespace ogss {
             }
 
             /**
-            * Maps from current position until offset.
-            *
-            * @return a buffer that has exactly offset many bytes remaining
-            */
-            MappedOutStream *jumpAndMap(long offset);
-
-            /**
-             * Delete a mapping.
-             * This method has to be called for the result of jump and map eventually.
-             * At that point, no clone of the argument stream must be in use.
-             * @note do NOT call this for clones!
-             * @note the argument map will be deleted!
-             * @note clones must be deleted by the cloner
+             * Write a BufferdOutStream to disk.
+             *
+             * @param out
+             *            the data to be written
+             * @note out is deleted as well
+             * @note should only be called to write the TF-Block prior
              */
-            void unmap(MappedOutStream *map);
+            void write(BufferedOutStream* out);
 
             inline void i8(int8_t v) {
                 require(1);

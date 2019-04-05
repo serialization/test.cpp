@@ -41,6 +41,8 @@ namespace ogss {
 
         class SeqReadTask;
 
+        class Writer;
+
         /**
          * this class reflects all storage pool properties, that do not depend on types
          *
@@ -60,13 +62,13 @@ namespace ogss {
 
             virtual ObjectID newObjectsSize() const = 0;
 
-            virtual void clearNewObjects() = 0;
-
+        protected:
             /**
              * number of deleted instances currently stored in this pool
              */
             ObjectID deletedCount = 0;
 
+        private:
             /**
              * Delete shall only be called from skill state
              *
@@ -192,6 +194,9 @@ namespace ogss {
              */
             int bpo;
 
+            //! reset internal state on write
+            virtual void resetOnWrite(Object **d) = 0;
+
         private:
             /**
              * The last valid ID (used to check get out of bounds errors)
@@ -263,6 +268,8 @@ namespace ogss {
             friend class SeqParser;
 
             friend class SeqReadTask;
+
+            friend class Writer;
 
             friend class api::File;
 

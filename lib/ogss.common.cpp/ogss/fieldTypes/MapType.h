@@ -60,6 +60,12 @@ namespace ogss {
                 return true;
             }
 
+            void writeDecl(streams::BufferedOutStream &out) const final {
+                out.i8(3);
+                out.v64(keyType->typeID);
+                out.v64(valueType->typeID);
+            }
+
         public:
 
             MapType(TypeID tid, uint32_t kcc, FieldType *const keyType, FieldType *const valueType)
@@ -72,7 +78,7 @@ namespace ogss {
             }
 
             /// simplify code generation
-            inline api::Map<K, V> *read(streams::InStream &in) {
+            inline api::Map <K, V> *read(streams::InStream &in) {
                 return (api::Map<K, V> *) r(in).map;
             }
         };

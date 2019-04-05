@@ -57,6 +57,11 @@ namespace ogss {
                 return true;
             }
 
+            void writeDecl(streams::BufferedOutStream &out) const final {
+                out.i8(1);
+                out.v64(base->typeID);
+            }
+
         public:
             ListType(TypeID tid, uint32_t kcc, FieldType *const base)
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}

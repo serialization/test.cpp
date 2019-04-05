@@ -5,7 +5,7 @@
 #ifndef SKILL_CPP_COMMON_ALLOBJECTITERATOR_H
 #define SKILL_CPP_COMMON_ALLOBJECTITERATOR_H
 
-#include "DynamicDataIterator.h"
+#include "TypeOrderIterator.h"
 
 namespace ogss {
     namespace api {
@@ -13,7 +13,7 @@ namespace ogss {
     }
     namespace iterators {
         /**
-         * wraps a dynamic data iterator
+         * wraps a type order iterator
          *
          * @author Timm Felden
          */
@@ -45,12 +45,12 @@ namespace ogss {
          */
         template<class T>
         class AllObjectIterator::Implementation : public AllObjectIterator {
-            DynamicDataIterator <T> iter;
+            TypeOrderIterator <T> iter;
 
         public:
             Implementation() : iter() { }
 
-            Implementation(const DynamicDataIterator <T> &iter) : iter(iter) { }
+            Implementation(const TypeOrderIterator<T> &iter) : iter(iter) { }
 
             Implementation(const Implementation <T> &i) : iter(i.iter) { }
 

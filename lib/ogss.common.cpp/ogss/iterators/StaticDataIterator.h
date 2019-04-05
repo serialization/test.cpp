@@ -6,6 +6,7 @@
 #define SKILL_CPP_COMMON_STATIC_DATA_ITERATOR_H
 
 #include <iterator>
+#include "../internal/Pool.h"
 
 
 namespace ogss {
@@ -41,8 +42,8 @@ namespace ogss {
             StaticDataIterator(const Pool<T> *p)
                     : p(p), index(p->bpo), last(index + p->staticDataInstances) {
 
-                // mode switch, if there is no other block
-                if (index == last) {
+                // mode switch, if there data is empty
+                if ((index == last) | (nullptr == p->data)) {
                     second = true;
                     index = 0;
                     last = p->newObjects.size();
@@ -53,13 +54,12 @@ namespace ogss {
                     : p(iter.p), index(iter.index), last(iter.last), second(iter.second) {}
 
             StaticDataIterator &operator++() {
-                if (index == last) {
-                    if (second)
-                        throw std::out_of_range("next on empty iterator");
-
-                    second = true;
-                    index = 0;
-                    last = p->newObjects.size();
+                if (++index == last) {
+                    if (!second) {
+                        second = true;
+                        index = 0;
+                        last = p->newObjects.size();
+                    }
                 }
                 return *this;
             }
@@ -73,7 +73,13 @@ namespace ogss {
             //! move to next position and return current element
             T *next() {
                 auto r = second ? p->newObjects[index] : p->data[index + 1];
-                this->operator++();
+                if (++index == last) {
+                    if (!second) {
+                        second = true;
+                        index = 0;
+                        last = p->newObjects.size();
+                    }
+                }
                 return r;
             }
 

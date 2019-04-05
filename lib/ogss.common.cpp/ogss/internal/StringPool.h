@@ -98,27 +98,26 @@ namespace ogss {
                 else {
                     String result = idMap[index];
                     if (nullptr == result) {
-#pragma omp critical
-                        {
-                            // read result
-                            uint64_t off = positions[index];
-                            result = in->string(off >> 32LU, (uint32_t) off, index);
+                        std::lock_guard<std::mutex> readLock(mapLock);
 
-                            // unify result with known strings
-                            auto it = knownStrings.find(result);
-                            if (it == knownStrings.end())
-                                // a new string
-                                knownStrings.insert(result);
-                            else {
-                                // a string that exists already;
-                                // the string cannot be from the file, so set the id
-                                delete result;
-                                result = *it;
-                                IDs[result] = index;
-                            }
+                        // read result
+                        uint64_t off = positions[index];
+                        result = in->string(off >> 32LU, (uint32_t) off, index);
 
-                            idMap[index] = result;
+                        // unify result with known strings
+                        auto it = knownStrings.find(result);
+                        if (it == knownStrings.end())
+                            // a new string
+                            knownStrings.insert(result);
+                        else {
+                            // a string that exists already;
+                            // the string cannot be from the file, so set the id
+                            delete result;
+                            result = *it;
+                            IDs[result] = index;
                         }
+
+                        idMap[index] = result;
                     }
                     return result;
                 }

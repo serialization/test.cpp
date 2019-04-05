@@ -62,6 +62,16 @@ namespace ogss {
                 }
             }
 
+            void resetOnWrite(Object **d) final {
+                // update data
+                data = (T **) d;
+
+                // update structural knowledge of data
+                staticDataInstances += newObjects.size() - deletedCount;
+                deletedCount = 0;
+                newObjects.clear();
+            }
+
             void allocateInstances() override {
                 book = new Book<T>(staticDataInstances);
                 T *page = book->firstPage();
@@ -79,11 +89,6 @@ namespace ogss {
              *  respective fields can be retrieved using the fieldTypes map.
              */
             std::vector<T *> newObjects;
-
-            virtual void clearNewObjects() {
-                staticDataInstances += newObjects.size();
-                newObjects.clear();
-            }
 
             //! static data iterator can traverse over new objects
             friend class iterators::StaticDataIterator<T>;
@@ -126,7 +131,7 @@ namespace ogss {
 
             std::unique_ptr<iterators::AllObjectIterator> allObjects() const final {
                 return std::unique_ptr<iterators::AllObjectIterator>(
-                        new iterators::AllObjectIterator::Implementation<T>(all()));
+                        new iterators::AllObjectIterator::Implementation<T>(allInTypeOrder()));
             }
 
             iterators::StaticDataIterator<T> staticInstances() const {

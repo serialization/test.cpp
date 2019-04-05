@@ -19,6 +19,8 @@ namespace ogss {
 
         template<class T>
         class Pool;
+
+        class Writer;
     }
     namespace fieldTypes {
         class AnyRefType;
@@ -73,6 +75,8 @@ namespace ogss {
             friend class internal::DistributedField;
 
             friend class internal::LazyField;
+            
+            friend class internal::Writer;
 
             friend class fieldTypes::AnyRefType;
         };

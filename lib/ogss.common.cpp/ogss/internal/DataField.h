@@ -11,6 +11,8 @@ namespace ogss {
     namespace internal {
         class SeqReadTask;
 
+        class Writer;
+
         /**
          * A field that is associated with data stored in a file.
          *
@@ -22,6 +24,7 @@ namespace ogss {
             DataField(const FieldType *const type, api::String const name,
                       const TypeID fieldID, AbstractPool *const owner)
                     : FieldDeclaration(type, name, fieldID, owner) {}
+
             /**
              * Read data from a mapped input stream and set it accordingly. This is invoked at the very end of state
              * construction and done massively in parallel.
@@ -37,6 +40,8 @@ namespace ogss {
             virtual bool write(int i, int last, streams::BufferedOutStream &out) const = 0;
 
             friend class SeqReadTask;
+
+            friend class Writer;
         };
 
     }

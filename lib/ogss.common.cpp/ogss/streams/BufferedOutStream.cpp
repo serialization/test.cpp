@@ -7,9 +7,10 @@
 using namespace ogss::streams;
 
 void BufferedOutStream::flush() {
-    int p = FileOutputStream::BUFFER_SIZE - (current.end - current.begin);
-    Buffer put = {current.begin - p, current.end, p};
-    completed.push_back(put);
+    if (current.size) {
+        int p = FileOutputStream::BUFFER_SIZE - (current.end - current.begin);
+        completed.emplace_back(Buffer({current.begin - p, current.end, p}));
+    }
     current.begin = new uint8_t[FileOutputStream::BUFFER_SIZE];
     *const_cast<uint8_t **>(&current.end) = current.begin + FileOutputStream::BUFFER_SIZE;
 }

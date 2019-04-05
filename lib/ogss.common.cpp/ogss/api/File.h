@@ -16,7 +16,7 @@
 
 namespace ogss {
     namespace internal {
-        class FileWriter;
+        class Writer;
 
         struct StateInitializer;
     }
@@ -51,7 +51,6 @@ namespace ogss {
          * spec independent public API for skill files
          */
         class File {
-            friend class ogss::internal::FileWriter;
 
         public:
             /**
@@ -248,6 +247,8 @@ namespace ogss {
              * @note to self: this might be a ** pointing to the first declared field, if the C++-implementation is utter garbage :-]
              */
             fieldTypes::FieldType *const SIFA[0];
+
+            friend class ogss::internal::Writer;
         };
     }
 }
