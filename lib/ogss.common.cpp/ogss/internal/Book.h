@@ -35,7 +35,7 @@ namespace ogss {
             /**
              * a new book that has pre allocated instances for the expected size
              */
-            Book(ObjectID expectedSize)
+            explicit Book(ObjectID expectedSize = defaultPageSize)
                     : freelist(), pages(), currentPage(new T[expectedSize]),
                       currentPageRemaining(0) {
                 pages.push_back(currentPage);

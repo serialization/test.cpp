@@ -114,6 +114,9 @@ namespace ogss {
             }
 
             T *make() override {
+                if (!book)
+                    book = new Book<T>();
+
                 T *rval = book->next();
                 new(rval) T();
                 rval->id = -1;
