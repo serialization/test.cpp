@@ -35,8 +35,8 @@ File::File(internal::StateInitializer *init)
           anyRef(init->AnyRef),
           classCount(init->classes.size()),
           classes(new AbstractPool *[classCount]),
-          containerCount(0),
-          containers(nullptr),
+          containerCount(init->containers.size()),
+          containers(new HullType *[containerCount]),
           enumCount(0),
           enums(nullptr),
           TBN(nullptr),
@@ -53,6 +53,10 @@ File::File(internal::StateInitializer *init)
         auto t = init->classes[i];
         t->owner = this;
         const_cast<AbstractPool **>(classes)[i] = t;
+    }
+    for (size_t i = 0; i < containerCount; i++) {
+        auto t = init->containers[i];
+        const_cast<HullType **>(containers)[i] = t;
     }
 }
 

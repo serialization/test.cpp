@@ -24,6 +24,11 @@ namespace ogss {
          */
         struct ogssLess {
             bool operator()(const String &lhs, const String &rhs) const {
+                if (nullptr == lhs)
+                    return true;
+                if (nullptr == rhs)
+                    return false;
+
                 const long cmp = lhs->size() - rhs->size();
                 return cmp == 0 ? *lhs < *rhs : cmp < 0;
             }
