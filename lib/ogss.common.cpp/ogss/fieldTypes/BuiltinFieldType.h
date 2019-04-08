@@ -30,7 +30,7 @@ namespace ogss {
          */
         template<typename T, TypeID id,
                 api::Box Read(InStream &),
-                bool Write(api::Box, streams::BufferedOutStream &)>
+                bool Write(api::Box, streams::BufferedOutStream *)>
         struct StatelessFieldType : BuiltinFieldType<T, id> {
             StatelessFieldType() : BuiltinFieldType<T, id>() {}
 
@@ -38,7 +38,7 @@ namespace ogss {
                 return Read(in);
             }
 
-            virtual bool w(api::Box v, streams::BufferedOutStream &out) const {
+            virtual bool w(api::Box v, streams::BufferedOutStream *out) const {
                 return Write(v, out);
             }
         };

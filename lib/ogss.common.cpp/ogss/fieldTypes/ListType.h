@@ -41,15 +41,15 @@ namespace ogss {
                 }
             }
 
-            bool write(streams::BufferedOutStream &out) final {
+            bool write(streams::BufferedOutStream *out) final {
                 const int count = idMap.size() - 1;
                 if (0 != count) {
-                    out.v64(count);
+                    out->v64(count);
                     for (int i = 1; i <= count; i++) {
                         auto xs = (api::Array<T> *) idMap[i];
-                        out.v64((int) xs->size());
+                        out->v64((int) xs->size());
                         for (T x : *xs) {
-                            base->w(x, out);
+                            base->w(api::box(x), out);
                         }
                     }
                     return false;

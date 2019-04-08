@@ -144,7 +144,7 @@ namespace ogss {
 
             static void writeLiterals(StringPool *const sp, ogss::streams::FileOutputStream *out);
 
-            bool write(ogss::streams::BufferedOutStream &) final;
+            bool write(ogss::streams::BufferedOutStream *) final;
 
             void allocateInstances(int, ogss::streams::MappedInStream *) final;
 

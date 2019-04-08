@@ -255,12 +255,12 @@ namespace ogss {
 
             api::Box r(streams::InStream &in) const final;
 
-            bool w(api::Box target, streams::BufferedOutStream &out) const final {
+            bool w(api::Box target, streams::BufferedOutStream *out) const final {
                 const auto v = target.anyRef;
                 if (v)
-                    out.v64(target.anyRef->id);
+                    out->v64(target.anyRef->id);
                 else
-                    out.i8(0);
+                    out->i8(0);
             }
 
             friend class AutoField;

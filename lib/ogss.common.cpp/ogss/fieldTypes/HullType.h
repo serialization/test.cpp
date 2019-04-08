@@ -59,7 +59,7 @@ namespace ogss {
              * @note If another field reduces deps to 0 it has to start a write job for this type.
              * @note This is in essence reference counting on an acyclic graph while writing data to disk.
              */
-            std::atomic<int> deps;
+            std::atomic_uint32_t deps;
 
             /**
              * The maximal, i.e. static, number of serialized fields depending on this type.
@@ -67,7 +67,7 @@ namespace ogss {
              * @note Can be 0.
              * @note If 0, the HullType is excluded from serialization.
              */
-            int maxDeps = 0;
+            uint32_t maxDeps = 0;
 
         protected:
             /**
@@ -110,11 +110,11 @@ namespace ogss {
              * @note the fieldID is written by the caller
              * @return true iff hull shall be discarded (i.e. it is empty)
              */
-            virtual bool write(streams::BufferedOutStream &out) = 0;
+            virtual bool write(streams::BufferedOutStream *out) = 0;
 
 
             explicit HullType(TypeID tid, uint32_t kcc)
-            : FieldType(tid), mapLock(), kcc(kcc), deps(0), idMap(), IDs() {
+                    : FieldType(tid), mapLock(), kcc(kcc), deps(0), idMap(), IDs() {
                 idMap.push_back(nullptr);
             }
 
@@ -147,13 +147,13 @@ namespace ogss {
                 return get(in.v32());
             }
 
-            bool w(api::Box v, streams::BufferedOutStream &out) const final {
+            bool w(api::Box v, streams::BufferedOutStream *out) const final {
                 if (!v.anyRef) {
-                    out.i8(0);
+                    out->i8(0);
                     return true;
                 }
 
-                out.v64(id(v.anyRef));
+                out->v64(id(v.anyRef));
                 return false;
             }
 

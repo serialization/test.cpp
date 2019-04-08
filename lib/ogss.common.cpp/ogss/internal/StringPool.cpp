@@ -136,22 +136,22 @@ void internal::StringPool::writeLiterals(StringPool *const sp, ogss::streams::Fi
     }
 }
 
-bool internal::StringPool::write(ogss::streams::BufferedOutStream &out) {
+bool internal::StringPool::write(ogss::streams::BufferedOutStream *out) {
     const int count = idMap.size() - hullOffset;
     if (0 == count)
         return true;
 
-    out.v64(count);
+    out->v64(count);
 
     // lengths
     for (int i = 0; i < count; i++) {
-        out.v64((int) idMap[i + hullOffset]->size());
+        out->v64((int) idMap[i + hullOffset]->size());
     }
 
     // data
     for (int i = 0; i < count; i++) {
         const String s = idMap[i + hullOffset];
-        out.put(reinterpret_cast<const uint8_t *>(s->c_str()), s->size());
+        out->put(reinterpret_cast<const uint8_t *>(s->c_str()), s->size());
     }
 
     return false;

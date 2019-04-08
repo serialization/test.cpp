@@ -78,7 +78,7 @@ Writer::Writer(api::File *state, streams::FileOutputStream &out) {
     bool hasErrors = false;
     size_t i = 0;
     for (; awaitBuffers != 0; awaitBuffers--, i++) {
-        std::future<BufferedOutStream *> *f;
+        std::future<BufferedOutStream *> *f = nullptr;
         {
             std::lock_guard<std::mutex> consumerLock(resultLock);
             if (!errors.empty()) {
@@ -208,13 +208,13 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
         for (int i = 0; i < containerCount; i++) {
             HullType *const c = state->containers[i];
             if (c->maxDeps != 0) {
-                c->deps = c->maxDeps;
+                c->deps.store(c->maxDeps);
                 count++;
             }
         }
         if (string->maxDeps != 0) {
             awaitHulls = 1;
-            string->deps = string->maxDeps;
+            string->deps.store(string->maxDeps);
         }
         awaitHulls += count;
 
@@ -383,7 +383,7 @@ BufferedOutStream *Writer::writeHull(Writer *self, HullType *t) {
 
     try {
         buffer->v64(t->fieldID);
-        discard = t->write(*buffer);
+        discard = t->write(buffer);
 
         if (auto p = dynamic_cast<fieldTypes::SingleArgumentType *>(t)) {
             if (auto bt = dynamic_cast<HullType *>(p->base)) {
