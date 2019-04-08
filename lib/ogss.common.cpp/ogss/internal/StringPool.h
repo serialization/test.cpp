@@ -106,10 +106,10 @@ namespace ogss {
 
                         // unify result with known strings
                         auto it = knownStrings.find(result);
-                        if (it == knownStrings.end())
+                        if (it == knownStrings.end()) {
                             // a new string
                             knownStrings.insert(result);
-                        else {
+                        } else {
                             // a string that exists already;
                             // the string cannot be from the file, so set the id
                             delete result;

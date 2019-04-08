@@ -58,6 +58,7 @@ namespace ogss {
             */
             MappedInStream *jumpAndMap(long offset) {
                 assert(offset > 0);
+                assert(position + offset <= end);
                 auto r = new MappedInStream(base, position, position + offset);
                 position += offset;
                 return r;

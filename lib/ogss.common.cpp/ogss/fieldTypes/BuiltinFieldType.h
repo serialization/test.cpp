@@ -47,49 +47,49 @@ namespace ogss {
                 BufferedOutStream::boolBox> {
         };
 
-        const BoolFieldType BoolType;
+        extern BoolFieldType BoolType;
 
         struct I8FieldType : public StatelessFieldType<int8_t, 1, InStream::i8Box,
                 BufferedOutStream::i8Box> {
         };
 
-        const I8FieldType I8;
+        extern I8FieldType I8;
 
         struct I16FieldType : public StatelessFieldType<int16_t, 2, InStream::i16Box,
                 BufferedOutStream::i16Box> {
         };
 
-        const I16FieldType I16;
+        extern I16FieldType I16;
 
         struct I32FieldType : public StatelessFieldType<int32_t, 3, InStream::i32Box,
                 BufferedOutStream::i32Box> {
         };
 
-        const I32FieldType I32;
+        extern I32FieldType I32;
 
         struct I64FieldType : public StatelessFieldType<int64_t, 4, InStream::i64Box,
                 BufferedOutStream::i64Box> {
         };
 
-        const I64FieldType I64;
+        extern I64FieldType I64;
 
         struct V64FieldType : public StatelessFieldType<int64_t, 5, InStream::v64Box,
                 BufferedOutStream::v64Box> {
         };
 
-        const V64FieldType V64;
+        extern V64FieldType V64;
 
         struct F32FieldType : public StatelessFieldType<float, 6, InStream::i32Box,
                 BufferedOutStream::i32Box> {
         };
 
-        const F32FieldType F32;
+        extern F32FieldType F32;
 
         struct F64FieldType : public StatelessFieldType<double, 7, InStream::i64Box,
                 BufferedOutStream::i64Box> {
         };
 
-        const F64FieldType F64;
+        extern F64FieldType F64;
     }
 
 }

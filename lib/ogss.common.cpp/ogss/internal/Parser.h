@@ -7,8 +7,9 @@
 
 #include "PoolBuilder.h"
 #include "StateInitializer.h"
-#include "../streams/InStream.h"
 #include "StringPool.h"
+#include "../restrictions/FieldRestriction.h"
+#include "../streams/InStream.h"
 
 
 namespace ogss {
@@ -57,6 +58,8 @@ namespace ogss {
 
             std::unordered_set<TypeRestriction *> *typeRestrictions(int count);
 
+            std::unordered_set<restrictions::FieldRestriction *> *fieldRestrictions(int count);
+
             /**
              * Parse type definitions and merge them into the known type hierarchy
              */
@@ -71,6 +74,7 @@ namespace ogss {
             virtual void processData() = 0;
 
             friend struct StateInitializer;
+
         };
     }
 }

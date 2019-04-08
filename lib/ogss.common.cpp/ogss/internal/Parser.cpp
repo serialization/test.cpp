@@ -265,6 +265,10 @@ std::unordered_set<ogss::TypeRestriction *> *ogss::internal::Parser::typeRestric
     SK_TODO;
 }
 
+std::unordered_set<ogss::restrictions::FieldRestriction *> *ogss::internal::Parser::fieldRestrictions(int count) {
+    SK_TODO;
+}
+
 using ogss::fieldTypes::FieldType;
 
 FieldType *ogss::internal::Parser::fieldType() {
@@ -452,7 +456,15 @@ void ogss::internal::Parser::readFields(ogss::AbstractPool *p) {
         // read field
         const String name = Strings->r(*in).string;
         FieldType *t = fieldType();
-        // TODO HashSet<FieldRestriction<?>> rest = fieldRestrictions(t);
+        std::unordered_set<restrictions::FieldRestriction *> *attr;
+        {
+            int attrCount = in->v32();
+            if (attrCount)
+                attr = fieldRestrictions(attrCount);
+            else
+                attr = nullptr;
+        }
+
         FieldDeclaration *f = nullptr;
 
         while ((kfn = p->KFN(ki))) {
@@ -509,9 +521,8 @@ void ogss::internal::Parser::readFields(ogss::AbstractPool *p) {
     }
 
     // create remaining auto fields
-    if (kfn)
-        do {
-            // nextID wont be used anyway
-            p->KFC(ki, SIFA, 0);
-        } while (p->KFN(++ki));
+    for (; p->KFN(ki); ki++) {
+        // nextID wont be used anyway
+        p->KFC(ki, SIFA, 0);
+    }
 }

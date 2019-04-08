@@ -15,6 +15,20 @@ using namespace ogss;
 using namespace api;
 using namespace internal;
 
+// file.cpp knows anything anyway, so we realize global constants here to speed-up compilation
+namespace ogss {
+    namespace fieldTypes {
+        BoolFieldType BoolType;
+        I8FieldType I8;
+        I16FieldType I16;
+        I32FieldType I32;
+        I64FieldType I64;
+        V64FieldType V64;
+        F32FieldType F32;
+        F64FieldType F64;
+    }
+}
+
 File::File(internal::StateInitializer *init)
         : guard(*init->guard),
           strings(init->Strings),
