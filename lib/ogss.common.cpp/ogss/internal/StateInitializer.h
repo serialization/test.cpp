@@ -11,6 +11,7 @@
 
 namespace ogss {
     namespace fieldTypes {
+        class FieldType;
         class HullType;
     }
     namespace internal {
@@ -50,7 +51,7 @@ namespace ogss {
              * @note invariant: ∀i. SIFA[i].name == pb.KCN(i)
              * @note SIFA owns nothing; types are owned by type vectors above.
              */
-            FieldType **const SIFA;
+            fieldTypes::FieldType **const SIFA;
             const size_t sifaSize;
 
         protected:

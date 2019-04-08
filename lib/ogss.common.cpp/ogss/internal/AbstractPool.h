@@ -13,8 +13,6 @@
 #include "../fieldTypes/BuiltinFieldType.h"
 #include "../fieldTypes/FieldType.h"
 #include "../restrictions/TypeRestriction.h"
-#include "AutoField.h"
-#include "DataField.h"
 #include "StringPool.h"
 
 namespace ogss {
@@ -33,6 +31,10 @@ namespace ogss {
     }
     using restrictions::TypeRestriction;
     namespace internal {
+        class AutoField;
+
+        class DataField;
+
         class Creator;
 
         class Parser;
@@ -260,6 +262,10 @@ namespace ogss {
                 else
                     out.i8(0);
             }
+
+            friend class AutoField;
+
+            friend class DataField;
 
             friend class Creator;
 

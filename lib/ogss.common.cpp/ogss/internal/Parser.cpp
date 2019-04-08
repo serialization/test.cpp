@@ -2,6 +2,8 @@
 // Created by Timm Felden on 03.04.19.
 //
 
+#include "AutoField.h"
+#include "DataField.h"
 #include "LazyField.h"
 #include "Parser.h"
 #include "SubPool.h"
@@ -82,7 +84,7 @@ void ogss::internal::Parser::typeDefinitions() {
     // the nextName, null if there is no next PD
     String nextName = pb.name(0);
 
-    AbstractPool *p = nullptr, *last;
+    AbstractPool *p = nullptr, *last = nullptr;
     AbstractPool *result;
 
     // Name of all seen class names to prevent duplicate allocation of the same pool.
@@ -90,13 +92,13 @@ void ogss::internal::Parser::typeDefinitions() {
     int TCls = in->v32();
 
     // file state
-    String name;
+    String name = nullptr;
     int count = 0;
-    AbstractPool *superDef;
-    std::unordered_set<TypeRestriction *> *attr;
+    AbstractPool *superDef = nullptr;
+    std::unordered_set<TypeRestriction *> *attr = nullptr;
     int bpo = 0;
 
-    for (bool moreFile = TCls > 0; (moreFile = TCls > 0) | (nullptr != nextName); TCls--) {
+    for (bool moreFile; (moreFile = (TCls > 0)) | (nullptr != nextName); TCls--) {
         // read next pool from file if required
         if (moreFile) {
             // name
@@ -119,17 +121,17 @@ void ogss::internal::Parser::typeDefinitions() {
 
             // super
             {
-                const int superID = in->v32();
+                const TypeID superID = in->v32();
                 if (0 == superID) {
                     superDef = nullptr;
                     bpo = 0;
-                } else if (superID > fdts.size() - 10)
+                } else if (superID > fdts.size())
                     ParseException(in.get(), std::string("Type ") + *name +
                                              " refers to an ill-formed super type.\n          found: " +
                                              std::to_string(superID) +
                                              "; current number of other types " + std::to_string(fdts.size() - 10));
                 else {
-                    superDef = dynamic_cast<AbstractPool *>(fdts[superID + 9]);
+                    superDef = (AbstractPool *) fdts[superID - 1];
                     bpo = in->v32();
                 }
             }
@@ -139,7 +141,7 @@ void ogss::internal::Parser::typeDefinitions() {
         bool keepKnown, keepFile = !moreFile;
         api::ogssLess compare;
         do {
-            keepKnown = nullptr == nextName;
+            keepKnown = (nullptr == nextName);
 
             if (moreFile) {
                 // check common case, i.e. the next class is the expected one
@@ -165,7 +167,7 @@ void ogss::internal::Parser::typeDefinitions() {
                         // invariant: p != superDef ⇒ superDef.THH != THH
                         // invariant: ∀p. p.next.THH <= p.THH + 1
                         // invariant: ∀p. p.Super = null <=> p.THH = 0
-                        if (superDef && superDef->THH < THH) {
+                        if (superDef && (superDef->THH < THH)) {
                             // we have to advance known pools
                             keepFile = true;
 
@@ -253,9 +255,9 @@ void ogss::internal::Parser::typeDefinitions() {
 
         // add a null value for each data field to ensure that the temporary size of data fields matches those
         // from file
-        int fields = in->v32();
-        if (fields)
-            result->dataFields.insert(result->dataFields.end(), fields, nullptr);
+        const int fieldCount = in->v32();
+        if (fieldCount)
+            result->dataFields.insert(result->dataFields.end(), fieldCount, nullptr);
     }
 }
 

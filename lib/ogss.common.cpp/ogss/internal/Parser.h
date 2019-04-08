@@ -33,7 +33,7 @@ namespace ogss {
              * Turns a field type into a preliminary type information. In case of user types, the declaration of the respective
              * user type may follow after the field declaration.
              */
-            FieldType *fieldType();
+            fieldTypes::FieldType *fieldType();
 
         protected:
             const PoolBuilder &pb;
@@ -47,7 +47,7 @@ namespace ogss {
              * File defined types. This array is used to resolve type IDs while parsing. The type IDs assigned to created
              * entities may not correspond to fdts indices (shifted by 10).
              */
-            std::vector<FieldType *> fdts;
+            std::vector<fieldTypes::FieldType *> fdts;
 
             Parser(const std::string &path, streams::FileInputStream *in, const PoolBuilder &pb);
 

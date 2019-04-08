@@ -59,7 +59,7 @@ namespace ogss {
             void flush();
 
             inline void require(int i) {
-                if ((int)(current.end - current.begin) < i)
+                if ((int) (current.end - current.begin) < i)
                     flush();
             }
 
@@ -259,7 +259,6 @@ namespace ogss {
                         flush();
                     std::memcpy(current.begin, data, size);
                     current.begin += size;
-                    bytesWriten += size;
                 }
             }
 
@@ -269,8 +268,8 @@ namespace ogss {
             void close() {
                 int p = FileOutputStream::BUFFER_SIZE - (current.end - current.begin);
                 if (p) {
-                    Buffer put = {current.begin - p, current.end, p};
-                    completed.push_back(put);
+                    completed.emplace_back(Buffer({current.begin - p, current.end, p}));
+                    bytesWriten += p;
                 } else {
                     delete[] current.begin;
                 }

@@ -9,6 +9,7 @@ using namespace ogss::streams;
 void BufferedOutStream::flush() {
     if (current.size) {
         int p = FileOutputStream::BUFFER_SIZE - (current.end - current.begin);
+        bytesWriten += p;
         completed.emplace_back(Buffer({current.begin - p, current.end, p}));
     }
     current.begin = new uint8_t[FileOutputStream::BUFFER_SIZE];

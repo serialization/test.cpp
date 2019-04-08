@@ -86,7 +86,18 @@ namespace ogss {
              * @note out is deleted as well
              * @note should only be called to write the TF-Block prior
              */
-            void write(BufferedOutStream* out);
+            void write(BufferedOutStream *out);
+
+            /**
+             * Write a BufferdOutStream to disk prepending it with its size in bytes.
+             *
+             * @note out is deleted as well
+             * @note it is silently assumed, that the buffer of file output stream is unused
+             * @note the size written is reduced by 2, as no valid buffer can be smaller than that
+             * @param out
+             *            the data to be written
+             */
+            void writeSized(BufferedOutStream *out);
 
             inline void i8(int8_t v) {
                 require(1);
@@ -162,7 +173,9 @@ namespace ogss {
             inline void put(const api::String s) {
                 const auto size = s->size();
                 if (size >= BUFFER_SIZE) {
-                    flush();
+                    if (base != position) {
+                        flush();
+                    }
                     fwrite(s->c_str(), 1, size, file);
                     bytesWriten += size;
                 } else {

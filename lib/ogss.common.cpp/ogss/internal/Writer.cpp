@@ -7,11 +7,12 @@
 #include "../api/File.h"
 #include "../streams/FileOutputStream.h"
 #include "../fieldTypes/HullType.h"
+#include "../fieldTypes/MapType.h"
+#include "../fieldTypes/SingleArgumentType.h"
 
+#include "DataField.h"
 #include "Pool.h"
 #include "Writer.h"
-#include "../fieldTypes/SingleArgumentType.h"
-#include "../fieldTypes/MapType.h"
 
 using namespace ogss::internal;
 using ogss::streams::BufferedOutStream;
@@ -69,7 +70,56 @@ Writer::Writer(api::File *state, streams::FileOutputStream &out) {
         out.write(buffer);
     }
 
-    SK_TODO + "consume buffers!";
+    /**
+     * *************** * HD * ****************
+     */
+
+    // await data from all HD tasks
+    bool hasErrors = false;
+    size_t i = 0;
+    for (; awaitBuffers != 0; awaitBuffers--, i++) {
+        std::future<BufferedOutStream *> *f;
+        {
+            std::lock_guard<std::mutex> consumerLock(resultLock);
+            if (!errors.empty()) {
+                // if a task crashed, we will inevitably notice it here,
+                // because sending its buffer is its last action
+                hasErrors = true;
+                // @note there is still a data race between successful threads and crashing threads that may lead to a
+                // crash; it would become harmless, if we get rid of resultLock, because Writer is stack-local
+                // @note we could also set a shutdown flag, if this is a serious problem
+                break;
+            }
+
+            f = &results.at(i);
+        }
+        BufferedOutStream *const buf = f->get();
+        if (buf) {
+            out.writeSized(buf);
+        }
+        // else: some buffer was discarded
+    }
+
+    // report errors
+    if (hasErrors) {
+        std::lock_guard<std::mutex> consumerLock(resultLock);
+        // await remaining buffers to prevent crashes
+        for (; awaitBuffers != 0; awaitBuffers--, i++) {
+            if (i < results.size()) {
+                auto buf = results.at(i).get();
+                // delete remaining successful buffers
+                if (buf)
+                    delete buf;
+            }
+        }
+
+        std::stringstream ss;
+        ss << "write failed:";
+        for (auto &msg : errors) {
+            ss << "\n  " << msg;
+        }
+        throw ogss::Exception(ss.str());
+    }
 }
 
 static inline void attr(AbstractPool *const p, BufferedOutStream &out) {
@@ -81,7 +131,7 @@ static inline void attr(FieldDeclaration *const p, BufferedOutStream &out) {
 }
 
 uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
-    uint32_t awaitHulls;
+    uint32_t awaitHulls = 0;
 
     std::vector<DataField *> fieldQueue;
     StringPool *const string = (StringPool *) state->strings;
@@ -211,7 +261,7 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
      * *************** * F * ****************
      */
 
-    for (FieldDeclaration *f : fieldQueue) {
+    for (DataField *f : fieldQueue) {
         // write info
         out.v64(string->id(f->name));
         out.v64(f->type->typeID);
@@ -295,7 +345,7 @@ BufferedOutStream *Writer::writeField(Writer *self, DataField *f) {
         // any empty field will be discarded
         if (i != h) {
             buffer->v64(f->fieldID);
-            discard = f->write(i, h, *buffer);
+            discard = f->write(i, h, buffer);
         }
 
         if (auto ht = dynamic_cast<HullType *>((FieldType *) f->type)) {

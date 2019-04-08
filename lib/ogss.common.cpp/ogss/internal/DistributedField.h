@@ -31,7 +31,7 @@ namespace ogss {
 
             void read(int i, int last, streams::MappedInStream &in) const override;
 
-            bool write(int i, int last, streams::BufferedOutStream &out) const override;
+            bool write(int i, int last, streams::BufferedOutStream *out) const override;
 
             bool check() const override;
         };

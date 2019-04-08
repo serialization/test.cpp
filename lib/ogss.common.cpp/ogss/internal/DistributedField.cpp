@@ -43,7 +43,11 @@ DistributedField::~DistributedField() {
 }
 
 
-bool DistributedField::write(int i, const int last, streams::BufferedOutStream &out) const {
+void DistributedField::read(int i, int last, streams::MappedInStream &in) const {
+    SK_TODO;
+}
+
+bool DistributedField::write(int i, const int last, streams::BufferedOutStream *out) const {
     SK_TODO;
     //    auto c = dynamic_cast<const ::ogss::internal::SimpleChunk *>(dataChunks.back());
     //    // case c : SimpleChunk =>
@@ -52,10 +56,6 @@ bool DistributedField::write(int i, const int last, streams::BufferedOutStream &
     //    while (i != end) {
     //        type->w(out, data[i++]);
     //    }
-}
-
-void DistributedField::read(int i, int last, streams::MappedInStream &in) const {
-    SK_TODO;
 }
 
 /**

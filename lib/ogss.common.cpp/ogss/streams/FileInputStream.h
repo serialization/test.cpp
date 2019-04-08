@@ -10,6 +10,7 @@
 
 #include <string>
 #include <memory>
+#include <cassert>
 
 namespace ogss {
     namespace streams {
@@ -56,6 +57,7 @@ namespace ogss {
             * @return a buffer that has exactly offset many bytes remaining
             */
             MappedInStream *jumpAndMap(long offset) {
+                assert(offset > 0);
                 auto r = new MappedInStream(base, position, position + offset);
                 position += offset;
                 return r;
