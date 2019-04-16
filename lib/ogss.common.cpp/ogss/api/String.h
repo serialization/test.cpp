@@ -32,6 +32,33 @@ namespace ogss {
                 const long cmp = lhs->size() - rhs->size();
                 return cmp == 0 ? *lhs < *rhs : cmp < 0;
             }
+
+            /**
+             * perform a three-state Java-style comparison
+             */
+            static int javaCMP(const String &lhs, const String &rhs) {
+                if (lhs == rhs)
+                    return 0;
+                if (nullptr == lhs)
+                    return -1;
+                if (nullptr == rhs)
+                    return 1;
+
+
+                {
+                    if (const auto cmp = lhs->size() - rhs->size())
+                        return cmp;
+                }
+
+                auto l = lhs->data();
+                auto r = rhs->data();
+                for (int i = lhs->size(); i > 0; i--) {
+                    if (auto cmp = *l++ - *r++)
+                        return cmp;
+                }
+
+                return 0;
+            }
         };
 
         /**

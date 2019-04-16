@@ -7,6 +7,7 @@
 #define SKILL_CPP_COMMON_TYPES_H
 
 #include "Box.h"
+#include "Enum.h"
 #include "Arrays.h"
 #include "Sets.h"
 #include "Maps.h"

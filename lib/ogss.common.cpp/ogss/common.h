@@ -19,6 +19,13 @@ namespace ogss {
     typedef int TypeID;
 
     /**
+     * the base type of generated enum constants
+     *
+     * @note setting an enum value not corresponding to a proxy has undefined semantics (very likely crash)
+     */
+    typedef uint32_t EnumBase;
+
+    /**
      * zero cost signed to unsigned conversion
      */
     inline uint64_t unsign(int64_t v) {

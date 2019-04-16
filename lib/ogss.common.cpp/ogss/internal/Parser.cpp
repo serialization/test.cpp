@@ -4,6 +4,7 @@
 
 #include "AutoField.h"
 #include "DataField.h"
+#include "EnumPool.h"
 #include "LazyField.h"
 #include "Parser.h"
 #include "SubPool.h"
@@ -129,7 +130,7 @@ void ogss::internal::Parser::typeDefinitions() {
                     ParseException(in.get(), std::string("Type ") + *name +
                                              " refers to an ill-formed super type.\n          found: " +
                                              std::to_string(superID) +
-                                             "; current number of other types " + std::to_string(fdts.size() - 10));
+                                             "; current number of other types " + std::to_string(fdts.size()));
                 else {
                     superDef = (AbstractPool *) fdts[superID - 1];
                     bpo = in->v32();

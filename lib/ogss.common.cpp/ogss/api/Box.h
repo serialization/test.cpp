@@ -12,6 +12,8 @@
 
 namespace ogss {
     namespace api {
+        class AbstractEnumProxy;
+
         class BoxedArray;
 
         class BoxedSet;
@@ -40,13 +42,15 @@ namespace ogss {
             BoxedSet *set;
             BoxedMap *map;
             Object *anyRef;
+            //! a proxy to an enum constant
+            AbstractEnumProxy *enumProxy;
         };
 
 
         template<typename T>
-        inline Box box(const T x){
+        inline Box box(const T x) {
             Box r;
-            r.anyRef = reinterpret_cast<Object*>(x);
+            r.anyRef = reinterpret_cast<Object *>(x);
             return r;
         }
 

@@ -12,13 +12,14 @@
 namespace ogss {
     namespace fieldTypes {
         class FieldType;
+
         class HullType;
     }
     namespace internal {
 
         class AbstractPool;
 
-        class EnumPool;
+        class AbstractEnumPool;
 
         using streams::FileInputStream;
         using fieldTypes::AnyRefType;
@@ -42,7 +43,7 @@ namespace ogss {
             // types
             std::vector<internal::AbstractPool *> classes;
             std::vector<HullType *> containers;
-            std::vector<EnumPool *> enums;
+            std::vector<AbstractEnumPool *> enums;
 
             /**
              * State Initialization of Fields Array. We will memcpy the variable part of the array into the first field to
