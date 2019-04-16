@@ -146,11 +146,9 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
 
         const int classCount = state->classCount;
         int *const bpos = new int[classCount];
-        int bases = 0;
         for (int i = 0; i < classCount; i++) {
             AbstractPool *const p = state->classes[i];
             if (nullptr == p->super) {
-                bases++;
                 barrier.push_back(std::async(std::launch::async,
                                              compress, p, bpos));
             }

@@ -10,12 +10,8 @@
 #include "../internal/RTTIBase.h"
 #include "../streams/BufferedOutStream.h"
 #include "../streams/MappedInStream.h"
-#include "../streams/MappedOutStream.h"
 
 namespace ogss {
-    namespace streams {
-        class MappedOutStream;
-    }
 
     /**
      * this namespace contains field type information used by skill

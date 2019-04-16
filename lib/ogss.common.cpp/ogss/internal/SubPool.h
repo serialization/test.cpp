@@ -20,18 +20,15 @@ namespace ogss {
         class SubPool final : public Pool<T> {
 
             void allocateInstances() final {
-                SK_TODO;
-                //                int i = bpo, j;
-                //                final int high = i + staticDataInstances;
-                //                try {
-                //                    Constructor<T> make = cls.getConstructor(Pool.class, int.class);
-                //                    while (i < high) {
-                //                        data[i] = make.newInstance(this, j = (i + 1));
-                //                        i = j;
-                //                    }
-                //                } catch (Exception e) {
-                //                    throw new RuntimeException("internal error", e);
-                //                }
+                this->book = new Book<T>(this->staticDataInstances);
+                T *page = this->book->firstPage();
+                ObjectID i = this->bpo + 1;
+                const auto last = i + this->staticDataInstances;
+                for (; i < last; i++) {
+                    // note: the first page consist of fresh instances. So, placement new is not required
+                    new(page) T(i, this);
+                    this->data[i] = page++;
+                }
             }
 
             AbstractPool *
@@ -40,9 +37,9 @@ namespace ogss {
             }
 
         public:
-            SubPool(TypeID poolIndex, AbstractPool *super, String name,
+            SubPool(TypeID TID, AbstractPool *super, String name,
                     ::std::unordered_set<::ogss::restrictions::TypeRestriction *> *restrictions)
-                    : Pool<T>(poolIndex, super, name, restrictions, 0) {}
+                    : Pool<T>(TID, super, name, restrictions, 0) {}
 
 
             T *make() override {

@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <string.h>
 #include "FileOutputStream.h"
-#include "MappedOutStream.h"
 #include "../api/Exception.h"
 #include "BufferedOutStream.h"
 

@@ -27,6 +27,8 @@ internal::StringPool::~StringPool() {
     // delete remaining knownStrings
     for (auto s : knownStrings)
         delete s;
+
+    delete[] positions;
 }
 
 String internal::StringPool::add(const char *target) {

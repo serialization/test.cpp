@@ -5,7 +5,9 @@
 #ifndef SKILL_CPP_COMMON_INSTREAM_H
 #define SKILL_CPP_COMMON_INSTREAM_H
 
+#include <cstring>
 #include <string>
+
 #include "Stream.h"
 #include "../api/String.h"
 #include "../api/Box.h"
@@ -51,8 +53,9 @@ namespace ogss {
 
             inline int16_t i16() {
                 ensure(position + 1 < end);
-                uint16_t r = *(position++) << 8;
-                r |= *(position++);
+                uint16_t r;
+                std::memcpy(&r, position, 2);
+                position += 2;
                 return r;
             }
 
@@ -64,10 +67,9 @@ namespace ogss {
 
             inline int32_t i32() {
                 ensure(position + 3 < end);
-                uint32_t r = *(position++) << 24;
-                r |= *(position++) << 16;
-                r |= *(position++) << 8;
-                r |= *(position++);
+                uint32_t r;
+                std::memcpy(&r, position, 4);
+                position += 4;
                 return r;
             }
 
@@ -80,14 +82,8 @@ namespace ogss {
             inline int64_t i64() {
                 ensure(position + 7 < end);
                 uint64_t r = 0;
-                r |= ((uint64_t) *(position++)) << 56;
-                r |= ((uint64_t) *(position++)) << 48;
-                r |= ((uint64_t) *(position++)) << 40;
-                r |= ((uint64_t) *(position++)) << 32;
-                r |= ((uint64_t) *(position++)) << 24;
-                r |= ((uint64_t) *(position++)) << 16;
-                r |= ((uint64_t) *(position++)) << 8;
-                r |= ((uint64_t) *(position++));
+                std::memcpy(&r, position, 8);
+                position += 8;
                 return r;
             }
 

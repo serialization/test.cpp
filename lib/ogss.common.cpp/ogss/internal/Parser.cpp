@@ -77,7 +77,7 @@ void ogss::internal::Parser::ParseException(ogss::InStream *in, const std::strin
 }
 
 void ogss::internal::Parser::typeDefinitions() {
-    int index = 0;
+    int nextTID = 10;
     int THH = 0;
     // the index of the next known class at index THH
     int nextID[50];
@@ -191,10 +191,13 @@ void ogss::internal::Parser::typeDefinitions() {
             if (keepKnown) {
                 // an unknown pool has to be created
                 if (superDef) {
-                    result = superDef->makeSub(index++, name, attr);
+                    result = superDef->makeSub(nextTID++, name, attr);
                 } else {
+                    if (last) {
+                        last->next = nullptr;
+                    }
                     last = nullptr;
-                    result = new SubPool<UnknownObject>(index++, nullptr, name, attr);
+                    result = new SubPool<UnknownObject>(nextTID++, nullptr, name, attr);
                 }
                 result->bpo = bpo;
                 fdts.push_back(result);
@@ -207,10 +210,13 @@ void ogss::internal::Parser::typeDefinitions() {
                 last = result;
             } else {
                 if (p) {
-                    p = p->makeSub(nextID[THH]++, index++, attr);
+                    p = p->makeSub(nextID[THH]++, nextTID++, attr);
                 } else {
+                    if (last) {
+                        last->next = nullptr;
+                    }
                     last = nullptr;
-                    p = pb.make(nextID[0]++, index++);
+                    p = pb.make(nextID[0]++, nextTID++);
                 }
                 // @note this is sane, because it is 0 if p is not part of the type hierarchy of superDef
                 p->bpo = bpo;

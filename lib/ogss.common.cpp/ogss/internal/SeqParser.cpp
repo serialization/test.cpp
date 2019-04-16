@@ -104,9 +104,9 @@ void SeqParser::typeBlock() {
 
 void SeqParser::processData() {
     // we expect one HD-entry per field
-    int remaining = fields.size();
-    std::vector<RTTIBase *> jobs;
-    jobs.reserve(remaining);
+    const int jobCount = fields.size();
+    int remaining = jobCount;
+    std::unique_ptr<RTTIBase *[]> jobs(new RTTIBase *[remaining]);
 
     while ((--remaining >= 0) & !in->eof()) {
         // create the map directly and use it for subsequent read-operations to avoid costly position and size
@@ -131,15 +131,18 @@ void SeqParser::processData() {
 
         } else if (auto fd = dynamic_cast<DataField *>(f)) {
             // create job with adjusted size that corresponds to the * in the specification (i.e. exactly the data)
-            jobs[id] = new SeqReadTask(fd, map);
+            auto task = new SeqReadTask(fd, map);
+            jobs[id] = task;
         } else {
             ParseException(in.get(), "created the same read job twice");
         }
     }
 
     // perform read tasks
-    for (auto j : jobs) {
-        if (j) {
+    for (int i = 0; i < jobCount; i++) {
+        // only fields with overwritten IDs contain jobs
+        if (nullptr == fields[i]) {
+            RTTIBase *j = jobs[i];
             if (auto rt = dynamic_cast<SeqReadTask *>(j)) {
                 rt->run();
                 delete rt;
@@ -147,5 +150,6 @@ void SeqParser::processData() {
                 ht->read();
             }
         }
+        // TODO else default initialization!
     }
 }

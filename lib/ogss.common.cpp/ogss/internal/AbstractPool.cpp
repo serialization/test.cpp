@@ -14,20 +14,19 @@ using restrictions::TypeRestriction;
 static AutoField **const noAutoFields = new AutoField *[0];
 
 ogss::internal::AbstractPool::AbstractPool(
-        TypeID typeID, AbstractPool *superPool,
+        TypeID TID, AbstractPool *superPool,
         api::String const name,
         std::unordered_set<TypeRestriction *> *restrictions,
         int afCount
-)
-        : FieldType(typeID), restrictions(restrictions),
-          name(name),
-          super(superPool),
-          base(superPool ? superPool->base : this),
-          THH(superPool ? superPool->THH + 1 : 0),
-          next(nullptr),
-          dataFields(),
-          afCount(afCount),
-          autoFields(afCount ? new AutoField *[afCount] : noAutoFields) {
+) : FieldType(TID), restrictions(restrictions),
+    name(name),
+    super(superPool),
+    base(superPool ? superPool->base : this),
+    THH(superPool ? superPool->THH + 1 : 0),
+    next(nullptr),
+    dataFields(),
+    afCount(afCount),
+    autoFields(afCount ? new AutoField *[afCount] : noAutoFields) {
 }
 
 internal::AbstractPool::~AbstractPool() {

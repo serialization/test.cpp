@@ -12,7 +12,7 @@ using ::age::api::File;
 
 TEST(AgeReadTest, ReadAge) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
     for (auto i = sf->Age->size(); i > 0; i--) {
         sf->Age->get(i);
@@ -24,7 +24,7 @@ TEST(AgeReadTest, ReadAge) {
 
 TEST(AgeReadTest, ReadAgeForachAPI) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
     const char *as = "\x01\x1c";
     for (auto &age : *sf->Age) {
@@ -35,7 +35,7 @@ TEST(AgeReadTest, ReadAgeForachAPI) {
 
 TEST(AgeReadTest, ReadAgeForachIterator) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
     const char *as = "\x01\x1c";
     for (const auto &age : sf->Age->all()) {
@@ -46,7 +46,7 @@ TEST(AgeReadTest, ReadAgeForachIterator) {
 
 TEST(AgeReadTest, ReadAgeForachIteratorOverwrite) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
     // set new ages
     const char *as = "\x10\x11";
@@ -62,7 +62,7 @@ TEST(AgeReadTest, ReadAgeForachIteratorOverwrite) {
 
 TEST(AgeReadTest, ReadAgeWhileIterator) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
     const char *as = "\x01\x1c";
 
@@ -76,7 +76,7 @@ TEST(AgeReadTest, ReadAgeWhileIterator) {
 
 TEST(AgeReadTest, ReadAgeCheckTypes) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(1, (int) sf->size());
     for (auto t : *sf) {
         ASSERT_EQ(age::internal::SK.Age, t->name);
@@ -85,7 +85,7 @@ TEST(AgeReadTest, ReadAgeCheckTypes) {
 
 TEST(AgeReadTest, ReadAgeCheckInstanceOrder) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/ageUnrestricted.sf"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(1, (int) sf->size());
     auto as = sf->Age->allInTypeOrder();
     for (ogss::ObjectID i = 1; i <= sf->Age->size(); i++) {

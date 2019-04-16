@@ -26,6 +26,9 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
         AbstractPool *p = nullptr, *last = nullptr;
         while (nextName) {
             if (0 == THH) {
+                if (last) {
+                    last->next = nullptr;
+                }
                 last = nullptr;
                 p = pb.make(nextID[0]++, tid++);
             } else {

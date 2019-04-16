@@ -5,9 +5,10 @@
 #ifndef SKILL_CPP_COMMON_FILEOUTPUTSTREAM_H
 #define SKILL_CPP_COMMON_FILEOUTPUTSTREAM_H
 
-#include <string>
 #include <assert.h>
 #include <cstring>
+#include <string>
+
 #include "Stream.h"
 #include "../api/String.h"
 

@@ -102,11 +102,12 @@ namespace ogss {
                 return (ObjectID) newObjects.size();
             }
 
-            Pool(TypeID typeID, AbstractPool *superPool,
+            Pool(TypeID TID, AbstractPool *superPool,
                  api::String name, std::unordered_set<TypeRestriction *> *restrictions, int autoFields)
-                    : AbstractPool(typeID, superPool, name, restrictions, autoFields),
+                    : AbstractPool(TID, superPool, name, restrictions, autoFields),
                       book(nullptr),
-                      data(nullptr) {}
+                      data(nullptr),
+                      newObjects() {}
 
             virtual ~Pool() {
                 if (book)

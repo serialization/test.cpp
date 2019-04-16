@@ -61,7 +61,7 @@ File::File(internal::StateInitializer *init)
 }
 
 File::~File() {
-    for (int i = 0; i < classCount; i++) {
+    for (size_t i = 0; i < classCount; i++) {
         delete classes[i];
     }
     delete[] classes;
@@ -69,11 +69,8 @@ File::~File() {
     delete anyRef;
     delete strings;
 
-    if (TBN) {
-        delete TBN;
-    }
-    if (fromFile)
-        delete fromFile;
+    delete TBN;
+    delete fromFile;
 }
 
 void File::check() {
