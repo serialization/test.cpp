@@ -85,4 +85,6 @@ StateInitializer::~StateInitializer() {
         delete Strings;
     if (AnyRef)
         delete AnyRef;
+
+    delete[] SIFA;
 }

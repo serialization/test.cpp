@@ -318,7 +318,7 @@ void Writer::compress(AbstractPool *const base, int *bpos) {
                 i->id = id;
                 id++;
             } else {
-                SK_TODO + "delete";
+                ((Pool<Object> *) base->owner->pool(i))->book->free(i);
             }
         }
     }

@@ -22,13 +22,9 @@ namespace ogss {
         protected:
             Object *const self;
 
-            Builder(Object *const instance) : self(instance) {}
+            explicit Builder(Object *const instance) : self(instance) {}
 
-        public:
-
-            virtual Object *make() {
-                return self;
-            }
+            virtual ~Builder() = default;
 
             template<class T>
             friend

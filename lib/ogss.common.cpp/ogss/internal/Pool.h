@@ -26,6 +26,8 @@ namespace ogss {
         template<class T>
         class SubPool;
 
+        class Writer;
+
         /**
          * @author Timm Felden
          *
@@ -38,7 +40,7 @@ namespace ogss {
             friend class AbstractPool;
 
             /**
-             * allocated when all instances are allocated, because by then, we can now
+             * allocated when all instances are allocated, because by then, we can know
              * how many instances are to be read from file, which is quite helpful
              */
             Book<T> *book;
@@ -109,6 +111,8 @@ namespace ogss {
             virtual ~Pool() {
                 if (book)
                     delete book;
+                if (!super)
+                    delete[] (data + 1);
             }
 
         public:
@@ -153,6 +157,8 @@ namespace ogss {
             const iterators::DynamicDataIterator<T> end() const {
                 return iterators::DynamicDataIterator<T>();
             }
+
+            friend class Writer;
         };
     }
 }

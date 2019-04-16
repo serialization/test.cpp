@@ -73,12 +73,15 @@ namespace ogss {
 
             StateInitializer(const std::string &path, FileInputStream *in, const PoolBuilder &pb);
 
-            virtual ~StateInitializer();
 
             /**
              * Calculate correct maxDeps values for containers used by containers.
              */
             void fixContainerMD();
+
+        public:
+            /// state initializer is freed by the OGFile constructor
+            virtual ~StateInitializer();
         };
     }
 }

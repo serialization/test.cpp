@@ -32,7 +32,7 @@ namespace ogss {
 
             virtual api::Object &operator*() const = 0;
 
-            virtual api::Object* operator->() const = 0;
+            virtual api::Object *operator->() const = 0;
 
             template<class T>
             class Implementation;
@@ -48,11 +48,11 @@ namespace ogss {
             TypeOrderIterator <T> iter;
 
         public:
-            Implementation() : iter() { }
+            Implementation() : iter() {}
 
-            Implementation(const TypeOrderIterator<T> &iter) : iter(iter) { }
+            Implementation(const TypeOrderIterator <T> &iter) : iter(iter) {}
 
-            Implementation(const Implementation <T> &i) : iter(i.iter) { }
+            Implementation(const Implementation<T> &i) : iter(i.iter) {}
 
             virtual AllObjectIterator &operator++() {
                 ++iter;
@@ -73,7 +73,7 @@ namespace ogss {
 
             virtual api::Object &operator*() const { return *iter; }
 
-            virtual api::Object* operator->() const { return iter.operator->(); }
+            virtual api::Object *operator->() const { return iter.operator->(); }
         };
     }
 }
