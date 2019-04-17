@@ -40,7 +40,7 @@ namespace ogss {
                     : p(nullptr), index(0), last(0), second(false) {}
 
             StaticDataIterator(const Pool<T> *p)
-                    : p(p), index(p->bpo), last(index + p->staticDataInstances) {
+                    : p(p), index(p->bpo), last(index + p->staticDataInstances), second(false) {
 
                 // mode switch, if there data is empty
                 if ((index == last) | (nullptr == p->data)) {
@@ -72,7 +72,7 @@ namespace ogss {
 
             //! move to next position and return current element
             T *next() {
-                auto r = second ? p->newObjects[index] : p->data[index + 1];
+                auto r = second ? p->newObjects[index] : p->data[index];
                 if (++index == last) {
                     if (!second) {
                         second = true;
@@ -108,11 +108,11 @@ namespace ogss {
 
             T &operator*() const {
                 // @note increment happens before access, because we shifted data by 1
-                return *(second ? p->newObjects[index] : p->data[index + 1]);
+                return *(second ? p->newObjects[index] : p->data[index]);
             }
 
             T *operator->() const {
-                return second ? p->newObjects[index] : p->data[index + 1];
+                return second ? p->newObjects[index] : p->data[index];
             }
 
             //!iterators themselves can be used in generalized for loops

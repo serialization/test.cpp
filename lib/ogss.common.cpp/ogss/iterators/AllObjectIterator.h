@@ -50,7 +50,7 @@ namespace ogss {
         public:
             Implementation() : iter() {}
 
-            Implementation(const TypeOrderIterator <T> &iter) : iter(iter) {}
+            explicit Implementation(const Pool<T> *p) : iter(p) {}
 
             Implementation(const Implementation<T> &i) : iter(i.iter) {}
 

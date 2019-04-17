@@ -305,21 +305,21 @@ void Writer::compress(AbstractPool *const base, int *bpos) {
     base->allocateData();
     Object **d = ((Pool<Object> *) base)->data;
     ((Pool<Object> *) base)->data = tmp;
-    ObjectID id = 1;
+    ObjectID pos = 0;
 
     {
         auto is = base->allObjects();
         while (is->hasNext()) {
             Object *const i = is->next();
             if (0 != i->id) {
-                d[id] = i;
-                i->id = id;
-                id++;
+                d[pos] = i;
+                i->id = ++pos;
             } else {
                 ((Pool<Object> *) base->owner->pool(i))->book->free(i);
             }
         }
     }
+    delete[] tmp;
 
     // update after compress for all sub-pools
     AbstractPool *p = base;

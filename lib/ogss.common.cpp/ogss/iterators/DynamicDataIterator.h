@@ -91,7 +91,7 @@ namespace ogss {
 
             //! move to next position and return current element
             T *next() {
-                auto r = second ? ((Pool<T> *) p)->newObjects[index] : ((Pool<T> *) p)->data[index + 1];
+                auto r = second ? ((Pool<T> *) p)->newObjects[index] : ((Pool<T> *) p)->data[index];
                 this->operator++();
                 return r;
             }
@@ -123,11 +123,11 @@ namespace ogss {
 
             T &operator*() const {
                 // @note increment happens before access, because we shifted data by 1
-                return *(second ? ((Pool<T> *) p)->newObjects[index] : ((Pool<T> *) p)->data[index + 1]);
+                return *(second ? ((Pool<T> *) p)->newObjects[index] : ((Pool<T> *) p)->data[index]);
             }
 
             T *operator->() const {
-                return second ? ((Pool<T> *) p)->newObjects[index] : ((Pool<T> *) p)->data[index + 1];
+                return second ? ((Pool<T> *) p)->newObjects[index] : ((Pool<T> *) p)->data[index];
             }
 
             //!iterators themselves can be used in generalized for loops

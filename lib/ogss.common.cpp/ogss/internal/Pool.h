@@ -35,9 +35,13 @@ namespace ogss {
          */
         template<class T>
         class Pool : public AbstractPool {
+        public:
+            /**
+             * @note internal use only!
+             */
+            T **data;
 
         protected:
-            friend class AbstractPool;
 
             /**
              * allocated when all instances are allocated, because by then, we can know
@@ -45,22 +49,11 @@ namespace ogss {
              */
             Book<T> *book;
 
-        public:
-            /**
-             * @note internal use only!
-             *
-             * @note the truth would be B*[], but this is not important now
-             * @note the pointer is shifted by 1, so that access by id will get the right
-             * result
-             */
-            T **data;
-
-        protected:
             void allocateData() final {
                 if (super) {
                     this->data = (T **) ((Pool<T> *) this->base)->data;
                 } else {
-                    this->data = new T *[this->cachedSize] - 1;
+                    this->data = new T *[this->cachedSize];
                 }
             }
 
@@ -77,12 +70,12 @@ namespace ogss {
             void allocateInstances() override {
                 book = new Book<T>(staticDataInstances);
                 T *page = book->firstPage();
-                ObjectID i = bpo + 1;
+                ObjectID i = bpo;
                 const auto last = i + staticDataInstances;
-                for (; i < last; i++) {
+                while (i < last) {
                     // note: the first page consist of fresh instances. So, placement new is not required
-                    page->id = i;
-                    data[i] = page++;
+                    data[i] = page;
+                    (page++)->id = ++i;
                 }
             }
 
@@ -91,12 +84,6 @@ namespace ogss {
              *  respective fields can be retrieved using the fieldTypes map.
              */
             std::vector<T *> newObjects;
-
-            //! static data iterator can traverse over new objects
-            friend class iterators::StaticDataIterator<T>;
-
-            //! dynamic data iterator can traverse over new objects
-            friend class iterators::DynamicDataIterator<T>;
 
             virtual ObjectID newObjectsSize() const {
                 return (ObjectID) newObjects.size();
@@ -113,14 +100,14 @@ namespace ogss {
                 if (book)
                     delete book;
                 if (!super)
-                    delete[] (data + 1);
+                    delete[] data;
             }
 
         public:
 
             inline T *get(ObjectID id) const {
                 // TODO check upper bound
-                return id <= 0 ? nullptr : data[id];
+                return id <= 0 ? nullptr : data[id - 1];
             }
 
             T *make() override {
@@ -136,7 +123,7 @@ namespace ogss {
 
             std::unique_ptr<iterators::AllObjectIterator> allObjects() const final {
                 return std::unique_ptr<iterators::AllObjectIterator>(
-                        new iterators::AllObjectIterator::Implementation<T>(allInTypeOrder()));
+                        new iterators::AllObjectIterator::Implementation<T>(this));
             }
 
             iterators::StaticDataIterator<T> staticInstances() const {
@@ -159,7 +146,16 @@ namespace ogss {
                 return iterators::DynamicDataIterator<T>();
             }
 
+
+            friend class AbstractPool;
+
             friend class Writer;
+
+            //! static data iterator can traverse over new objects
+            friend class iterators::StaticDataIterator<T>;
+
+            //! dynamic data iterator can traverse over new objects
+            friend class iterators::DynamicDataIterator<T>;
         };
     }
 }
