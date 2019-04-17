@@ -81,7 +81,7 @@ namespace ogss {
             const size_t containerCount;
             fieldTypes::HullType *const *const containers;
             const size_t enumCount;
-            fieldTypes::AbstractEnumType *const *const enums;
+            internal::AbstractEnumPool *const *const enums;
 
             /**
              * typename -> type mapping

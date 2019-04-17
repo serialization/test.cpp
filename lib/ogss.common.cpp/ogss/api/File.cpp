@@ -37,8 +37,8 @@ File::File(internal::StateInitializer *init)
           classes(new AbstractPool *[classCount]),
           containerCount(init->containers.size()),
           containers(new HullType *[containerCount]),
-          enumCount(0),
-          enums(nullptr),
+          enumCount(init->enums.size()),
+          enums(new AbstractEnumPool *[enumCount]),
           TBN(nullptr),
           fromFile(init->in.release()),
           currentWritePath(init->path),
@@ -59,6 +59,10 @@ File::File(internal::StateInitializer *init)
         auto t = init->containers[i];
         const_cast<HullType **>(containers)[i] = t;
     }
+    for (size_t i = 0; i < enumCount; i++) {
+        auto t = init->enums[i];
+        const_cast<AbstractEnumPool **>(enums)[i] = t;
+    }
 }
 
 File::~File() {
@@ -71,6 +75,11 @@ File::~File() {
         delete containers[i];
     }
     delete[] containers;
+
+    for (size_t i = 0; i < enumCount; i++) {
+        delete enums[i];
+    }
+    delete[] enums;
 
     delete anyRef;
     delete strings;

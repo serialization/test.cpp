@@ -73,8 +73,7 @@ namespace ogss {
                 ObjectID i = bpo;
                 const auto last = i + staticDataInstances;
                 while (i < last) {
-                    // note: the first page consist of fresh instances. So, placement new is not required
-                    data[i] = page;
+                    data[i] = new(page) T();
                     (page++)->id = ++i;
                 }
             }

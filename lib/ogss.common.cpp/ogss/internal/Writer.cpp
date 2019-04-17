@@ -13,6 +13,7 @@
 #include "DataField.h"
 #include "Pool.h"
 #include "Writer.h"
+#include "EnumPool.h"
 
 using namespace ogss::internal;
 using ogss::streams::BufferedOutStream;
@@ -243,18 +244,16 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
      */
 
     if (state->enumCount) {
-        SK_TODO + "enums";
-        //    // write count of the type block
-        //    out.v64(state.enums.length);
-        //    for (EnumPool< ?> p :
-        //    state.enums) {
-        //        out.v64(string.id(p.name));
-        //        out.v64(p.values.length);
-        //        for (EnumProxy< ?> v :
-        //        p.values) {
-        //            out.v64(string.id(v.name));
-        //        }
-        //    }
+        // write count of the type block
+        out.v64((int) state->enumCount);
+        for (int i = 0; i < state->enumCount; i++) {
+            internal::AbstractEnumPool *p = state->enums[i];
+            out.v64(string->id(p->name));
+            out.v64((int)((EnumPool<api::UnknownEnum> *) p)->values.size());
+            for (AbstractEnumProxy *v : *p) {
+                out.v64(string->id(v->name));
+            }
+        }
     } else
         out.i8(0);
 

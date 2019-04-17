@@ -39,9 +39,12 @@ namespace ogss {
         protected:
             AbstractEnumPool(int tid, const api::String name, const EnumBase last)
                     : FieldType(tid), last(last), name(name) {};
+
+            virtual ~AbstractEnumPool() = default;
         };
 
         struct Creator;
+        struct Writer;
 
         template<typename T>
         class EnumPool : public AbstractEnumPool {
@@ -68,13 +71,16 @@ namespace ogss {
                      api::String *const known, const EnumBase last)
                     : AbstractEnumPool(tid, name, last), values(), fileValues(), staticValues() {
 
+                api::EnumProxy<T> *p;
                 if (foundValues.empty()) {
                     // only known values, none from file
                     // @note we set file values anyway to get sane default values
                     staticValues.reserve(last);
                     values.reserve(last);
                     for (EnumBase i = 0; i < last; i++) {
-                        values[i] = staticValues[i] = new api::EnumProxy<T>((T) i, this, known[i], i);
+                        p = new api::EnumProxy<T>((T) i, this, known[i], i);
+                        values.push_back(p);
+                        staticValues.push_back(p);
                     }
                 } else {
                     this->fileValues.reserve(foundValues.size());
@@ -83,7 +89,9 @@ namespace ogss {
                     if (!known) {
                         values.reserve(foundValues.size());
                         for (size_t i = 0; i < values.size(); i++) {
-                            fileValues[i] = values[i] = new api::EnumProxy<T>(T::UNKNOWN, this, foundValues[i], i);
+                            p = new api::EnumProxy<T>(T::UNKNOWN, this, foundValues[i], i);
+                            fileValues.push_back(p);
+                            values.push_back(p);
                         }
                     } else {
                         staticValues.reserve(last);
@@ -92,7 +100,6 @@ namespace ogss {
                         // merge file values and statically known values
                         int id = 0, fi = 0;
                         EnumBase ki = 0;
-                        api::EnumProxy<T> *p;
                         while ((fi < foundValues.size()) | (ki < last)) {
                             int cmp = ki < last
                                       ? (fi < foundValues.size()
@@ -102,22 +109,33 @@ namespace ogss {
 
                             if (0 == cmp) {
                                 p = new api::EnumProxy<T>((T) ki, this, foundValues[fi], id++);
-                                fileValues[fi++] = p;
-                                staticValues[ki++] = p;
+
+                                fileValues.push_back(p);
+                                fi++;
+                                staticValues.push_back(p);
+                                ki++;
                                 values.push_back(p);
 
                             } else if (cmp < 0) {
                                 p = new api::EnumProxy<T>(T::UNKNOWN, this, foundValues[fi], id++);
-                                fileValues[fi++] = p;
+                                fileValues.push_back(p);
+                                fi++;
                                 values.push_back(p);
                             } else {
                                 p = new api::EnumProxy<T>((T) ki, this, known[ki], id++);
-                                staticValues[ki++] = p;
+                                staticValues.push_back(p);
+                                ki++;
                                 values.push_back(p);
                             }
                         }
                     }
                 }
+            }
+
+            ~EnumPool() final {
+                // all proxies from either source are in values, so delete only them
+                for (api::EnumProxy<T> *v : values)
+                    delete v;
             }
 
             api::AbstractEnumProxy *proxy(EnumBase target) const final {
@@ -126,7 +144,7 @@ namespace ogss {
 
             api::Box r(streams::InStream &in) const final {
                 api::Box r;
-                r.enumProxy = fileValues.at(in.v32());;
+                r.enumProxy = fileValues.at(in.v32());
                 return r;
             }
 
@@ -155,6 +173,7 @@ namespace ogss {
 
 
             friend struct Creator;
+            friend struct Writer;
         };
     }
 }

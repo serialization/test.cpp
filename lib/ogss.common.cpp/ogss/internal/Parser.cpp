@@ -399,50 +399,55 @@ void ogss::internal::Parser::TEnum() {
 
     int ki = 0;
     String nextName = pb.enumName(ki);
-    // TODO EnumPool* r;
+    AbstractEnumPool *r;
     // create enums from file
     for (int count = in->v32(); count != 0; count--) {
-        SK_TODO;
-        //        String name = Strings.get(in.v32());
-        //        int vcount = in.v32();
-        //        if (vcount <= 0)
-        //            throw new ParseException(in, null, "Enum %s is too small.", name);
-        //
-        //        String[] vs = new String[vcount];
-        //        for (int i = 0; i < vcount; i++) {
-        //            vs[i] = Strings.get(in.v32());
-        //        }
-        //
-        //        int cmp = null != nextName ? compare(name, nextName) : -1;
-        //
-        //        while (true) {
-        //            if (0 == cmp) {
-        //                r = new EnumPool(tid++, name, vs, pb.enumMake(ki++));
-        //                enums.add(r);
-        //                fdts.add(r);
-        //                SIFA[nsID++] = r;
-        //                nextName = pb.enumName(ki);
-        //                break;
-        //
-        //            } else if (cmp < 1) {
-        //                r = new EnumPool(tid++, name, vs, null);
-        //                enums.add(r);
-        //                fdts.add(r);
-        //                break;
-        //            }
-        //
-        //            r = new EnumPool(tid++, nextName, null, pb.enumMake(ki++));
-        //            enums.add(r);
-        //            SIFA[nsID++] = r;
-        //            nextName = pb.enumName(ki);
-        //            cmp = null != nextName ? compare(name, nextName) : -1;
-        //        }
+        String name = Strings->r(*in).string;
+        int vcount = in->v32();
+        if (vcount <= 0)
+            ParseException(in.get(), std::string("Enum ") + *name + " is zero-sized.");
+
+        std::vector<api::String> vs;
+        vs.reserve(vcount);
+        for (auto i = vcount; i != 0; i--) {
+            vs.push_back(Strings->r(*in).string);
+        }
+
+        int cmp = nextName ? api::ogssLess::javaCMP(name, nextName) : -1;
+
+        while (true) {
+            if (0 == cmp) {
+                r = pb.enumMake(ki++, tid++, vs);
+                enums.push_back(r);
+                fdts.push_back(r);
+                SIFA[nsID++] = r;
+                nextName = pb.enumName(ki);
+                break;
+
+            } else if (cmp < 1) {
+                r = new EnumPool<api::UnknownEnum>(tid++, name, vs, nullptr, 0);
+                enums.push_back(r);
+                fdts.push_back(r);
+                break;
+
+            } else {
+                // known, but not file
+                std::vector<api::String> noVS;
+                r = pb.enumMake(ki++, tid++, noVS);
+                enums.push_back(r);
+                SIFA[nsID++] = r;
+                nextName = pb.enumName(ki);
+                cmp = nextName ? api::ogssLess::javaCMP(name, nextName) : -1;
+            }
+        }
     }
     // create remaining known enums
     while (nextName) {
-        SK_TODO;
-        //        enums.add(new EnumPool(tid++, nextName, null, pb.enumMake(ki++)));
-        //        nextName = pb.enumName(ki);
+        std::vector<api::String> noVS;
+        r = pb.enumMake(ki++, tid++, noVS);
+        enums.push_back(r);
+        SIFA[nsID++] = r;
+        nextName = pb.enumName(ki);
     }
 }
 
