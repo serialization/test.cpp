@@ -18,7 +18,7 @@ namespace ogss {
             SeqReadTask(DataField *f, streams::MappedInStream *in)
                     : f(f), map(in) {}
 
-            ~SeqReadTask() {
+            ~SeqReadTask() final {
                 delete map;
             }
 
@@ -77,6 +77,7 @@ void SeqParser::typeBlock() {
             while (++i < cs) {
                 AbstractPool *p = classes[i];
                 p->allocateData();
+                p->lastID = p->bpo + p->cachedSize;
                 if (0 != p->staticDataInstances) {
                     p->allocateInstances();
                 }
@@ -126,13 +127,15 @@ void SeqParser::processData() {
 
             // create hull read data task except for StringPool which is still lazy per element and eager per offset
             if (!dynamic_cast<StringPool *>(p)) {
-                jobs[id] = p;
+                jobs.get()[id] = p;
+            } else {
+                jobs.get()[id] = nullptr;
             }
 
         } else if (auto fd = dynamic_cast<DataField *>(f)) {
             // create job with adjusted size that corresponds to the * in the specification (i.e. exactly the data)
             auto task = new SeqReadTask(fd, map);
-            jobs[id] = task;
+            jobs.get()[id] = task;
         } else {
             ParseException(in.get(), "created the same read job twice");
         }

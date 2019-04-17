@@ -16,31 +16,32 @@ using namespace ogss::fieldTypes;
 
 StateInitializer *StateInitializer::make(
         const std::string &path, const PoolBuilder &pb, int mode) {
-    StateInitializer *init;
+    std::unique_ptr<StateInitializer> init;
     if (mode & api::ReadMode::create)
-        init = new Creator(path, pb);
+        init.reset(new Creator(path, pb));
     else {
         FileInputStream *fs = new FileInputStream(path);
 
         if (fs->size() < SEQ_PARSER_LIMIT)
-            init = new SeqParser(path, fs, pb);
+            init.reset(new SeqParser(path, fs, pb));
         else
             SK_TODO + "par parser";
         //        else
         //            init = new ParParser(path, fs, pb);
 
-        ((Parser *) init)->parseFile(fs);
+        ((Parser *) init.get())->parseFile(fs);
     }
     init->canWrite = 0 == (mode & api::WriteMode::readOnly);
-    return init;
+    return init.release();
 }
 
 StateInitializer::StateInitializer(const std::string &path, FileInputStream *in,
                                    const PoolBuilder &pb)
         : path(path), in(in), canWrite(true),
           guard(),
+          classes(), containers(), enums(),
           Strings(new StringPool(in, pb.getSK())),
-          classes(), containers(), enums(), AnyRef(new AnyRefType(&classes)),
+          AnyRef(new AnyRefType(Strings, &classes)),
           SIFA(new FieldType *[pb.sifaSize]),
           sifaSize(pb.sifaSize),
           nsID(10),
@@ -81,10 +82,8 @@ void StateInitializer::fixContainerMD() {
 }
 
 StateInitializer::~StateInitializer() {
-    if (Strings)
-        delete Strings;
-    if (AnyRef)
-        delete AnyRef;
+    delete Strings;
+    delete AnyRef;
 
     delete[] SIFA;
 }

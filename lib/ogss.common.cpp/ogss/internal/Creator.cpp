@@ -34,6 +34,8 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
             } else {
                 p = p->makeSub(nextID[THH]++, tid++, nullptr);
             }
+            p->bpo = 0;
+            p->lastID = 0;
 
             SIFA[nsID++] = p;
             classes.push_back(p);

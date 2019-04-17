@@ -36,14 +36,14 @@ namespace ogss {
             // guard from file
             std::unique_ptr<std::string> guard;
 
-            // complex builtin types
-            StringPool *Strings;
-            AnyRefType *AnyRef;
-
             // types
             std::vector<internal::AbstractPool *> classes;
             std::vector<HullType *> containers;
             std::vector<AbstractEnumPool *> enums;
+
+            // complex builtin types
+            StringPool *Strings;
+            AnyRefType *AnyRef;
 
             /**
              * State Initialization of Fields Array. We will memcpy the variable part of the array into the first field to

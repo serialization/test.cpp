@@ -66,6 +66,11 @@ namespace ogss {
             ListType(TypeID tid, uint32_t kcc, FieldType *const base)
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}
 
+            ~ListType() final {
+                for (void *v : idMap)
+                    delete (api::Array<T> *) v;
+            }
+
             /// simplify code generation
             inline api::Array <T> *read(streams::InStream &in) {
                 return (api::Array<T> *) r(in).list;

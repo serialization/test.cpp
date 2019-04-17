@@ -6,6 +6,7 @@
 #define OGSS_TEST_CPP_AUTOFIELD_H
 
 #include "FieldDeclaration.h"
+#include "AbstractPool.h"
 
 namespace ogss {
     namespace internal {
@@ -22,7 +23,9 @@ namespace ogss {
         public:
             AutoField(const FieldType *const type, api::String const name,
                       const TypeID fieldID, AbstractPool *const owner)
-                    : FieldDeclaration(type, name, fieldID, owner) {}
+                    : FieldDeclaration(type, name, fieldID, owner) {
+                owner->autoFields[-1 - fieldID] = this;
+            }
 
             bool check() const final {
                 return true;// TODO

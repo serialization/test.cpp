@@ -22,12 +22,13 @@ namespace ogss {
             void allocateInstances() final {
                 this->book = new Book<T>(this->staticDataInstances);
                 T *page = this->book->firstPage();
-                ObjectID i = this->bpo + 1;
+                ObjectID i = this->bpo;
                 const auto last = i + this->staticDataInstances;
-                for (; i < last; i++) {
+                while (i < last) {
+                    const int j = i + 1;
                     // note: the first page consist of fresh instances. So, placement new is not required
-                    new(page) T(i, this);
-                    this->data[i] = page++;
+                    this->data[i] = new(page++) T(j, this);
+                    i = j;
                 }
             }
 

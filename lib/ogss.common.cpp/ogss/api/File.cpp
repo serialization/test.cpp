@@ -48,6 +48,7 @@ File::File(internal::StateInitializer *init)
     // release complex builtin types
     init->Strings = nullptr;
     init->AnyRef = nullptr;
+    anyRef->owner = this;
 
     for (size_t i = 0; i < classCount; i++) {
         auto t = init->classes[i];
@@ -65,6 +66,11 @@ File::~File() {
         delete classes[i];
     }
     delete[] classes;
+
+    for (size_t i = 0; i < containerCount; i++) {
+        delete containers[i];
+    }
+    delete[] containers;
 
     delete anyRef;
     delete strings;

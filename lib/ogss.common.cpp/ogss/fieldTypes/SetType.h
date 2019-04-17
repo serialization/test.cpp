@@ -66,6 +66,11 @@ namespace ogss {
             SetType(TypeID tid, uint32_t kcc, FieldType *const base)
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}
 
+            ~SetType() final {
+                for (void *v : idMap)
+                    delete (api::Set<T> *) v;
+            }
+
             /// simplify code generation
             inline api::Set<T> *read(streams::InStream &in) {
                 return (api::Set<T> *) r(in).set;

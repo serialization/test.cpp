@@ -155,7 +155,7 @@ namespace ogss {
                 } else if (NamedObj *no = dynamic_cast<NamedObj *>(ref))
                     return no->pool;
                 else
-                    return (internal::AbstractPool *) SIFA[ref->stid() - 10];
+                    return (internal::AbstractPool *) this->SIFA[ref->stid() - 10];
             }
 
             /**

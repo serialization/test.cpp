@@ -18,7 +18,8 @@ using namespace ogss::internal;
 using ogss::streams::BufferedOutStream;
 using ogss::fieldTypes::HullType;
 
-Writer::Writer(api::File *state, streams::FileOutputStream &out) {
+Writer::Writer(api::File *state, streams::FileOutputStream &out)
+        : resultLock(), results(), errors() {
     /**
      * *************** * G * ****************
      */
@@ -229,9 +230,11 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
     // case
     {
         std::lock_guard<std::mutex> rLock(resultLock);
+        // C++ bullshit: we have to reserve space for futures, because they would be deleted on resize :-(
+        results.reserve(fieldQueue.size() + awaitHulls);
         for (DataField *f : fieldQueue) {
-            results.push_back(std::async(std::launch::async,
-                                         writeField, this, f));
+            results.emplace_back(std::async(std::launch::async,
+                                            writeField, this, f));
         }
     }
 
@@ -299,6 +302,8 @@ void Writer::compress(AbstractPool *const base, int *bpos) {
         }
     }
 
+    // TODO compress distributed fields (has to be done before compression of pools)
+
     // from now on, size will take deleted objects into account, thus d may
     // in fact be smaller then data!
     Object **tmp = ((Pool<Object> *) base)->data;
@@ -349,8 +354,8 @@ BufferedOutStream *Writer::writeField(Writer *self, DataField *f) {
         if (auto ht = dynamic_cast<HullType *>((FieldType *) f->type)) {
             if (0 == --ht->deps) {
                 std::lock_guard<std::mutex> rLock(self->resultLock);
-                self->results.push_back(std::async(std::launch::async,
-                                                   writeHull, self, ht));
+                self->results.emplace_back(std::async(std::launch::async,
+                                                      writeHull, self, ht));
             }
         }
     } catch (std::exception &e) {

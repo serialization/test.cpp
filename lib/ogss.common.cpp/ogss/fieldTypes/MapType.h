@@ -71,6 +71,11 @@ namespace ogss {
             MapType(TypeID tid, uint32_t kcc, FieldType *const keyType, FieldType *const valueType)
                     : HullType(tid, kcc), in(nullptr), keyType(keyType), valueType(valueType) {};
 
+            ~MapType() final {
+                for (void *v : idMap)
+                    delete (api::Map<K, V> *) v;
+            }
+
             api::Box get(ObjectID ID) const final {
                 return api::box(((0 < ID) & (ID < idMap.size()))
                                 ? idMap[ID]
@@ -78,7 +83,7 @@ namespace ogss {
             }
 
             /// simplify code generation
-            inline api::Map <K, V> *read(streams::InStream &in) {
+            inline api::Map<K, V> *read(streams::InStream &in) {
                 return (api::Map<K, V> *) r(in).map;
             }
         };

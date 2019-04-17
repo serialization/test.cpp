@@ -12,16 +12,23 @@ namespace ogss {
     namespace internal {
 
         class DistributedField : public DataField {
+        private:
+            //! data is shifted by owner.bpo + 1
+            mutable ObjectID firstID;
         protected:
-            // data held as in storage pools
-            // TODO shift by owner.bpo; store lastID?
+            //! data holds pointers in [firstID; lastID[
+            mutable ObjectID lastID;
+            /**
+             * field data corresponding to Pool::data
+             * @note an array that is shifted by firstID to save space and access time
+             */
             mutable api::Box *data;
             mutable std::unordered_map<const api::Object *, api::Box> newData;
 
         public:
             DistributedField(const FieldType *const type, api::String name,
                              const TypeID index, AbstractPool *const owner)
-                    : DataField(type, name, index, owner), data(), newData() {}
+                    : DataField(type, name, index, owner), data(nullptr), newData() {}
 
             virtual ~DistributedField();
 

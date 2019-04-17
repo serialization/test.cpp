@@ -39,12 +39,19 @@ bool DistributedField::check() const {
 
 
 DistributedField::~DistributedField() {
-
+    if (data)
+        delete[] (data + firstID);
 }
 
 
-void DistributedField::read(int i, int last, streams::MappedInStream &in) const {
-    SK_TODO;
+void DistributedField::read(int i, const int last, streams::MappedInStream &in) const {
+    // we fill in data and data is nullptr at this point, so we have to allocate it first
+    firstID = i;
+    lastID = last;
+    data = new api::Box[last - i] - firstID;
+    while (i != last) {
+        data[i++] = type->r(in);
+    }
 }
 
 bool DistributedField::write(int i, const int last, streams::BufferedOutStream *out) const {
@@ -68,6 +75,8 @@ bool DistributedField::write(int i, const int last, streams::BufferedOutStream *
  * @todo ignores deletes!
  */
 //void DistributedField::resetChunks(ObjectID lbpo, ObjectID newSize) {
+// note to self: data could be null
+
 //    // @note we cannot delete objects and we will always write
 //    // therefore, new IDs will be data ++ newData matching exactly the pool's last block
 //

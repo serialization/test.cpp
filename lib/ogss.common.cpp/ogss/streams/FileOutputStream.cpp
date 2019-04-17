@@ -21,7 +21,8 @@ FileOutputStream::FileOutputStream(const std::string &path)
 }
 
 FileOutputStream::~FileOutputStream() {
-    fclose(file);
+    if (file)
+        fclose(file);
 }
 
 void FileOutputStream::flush() {

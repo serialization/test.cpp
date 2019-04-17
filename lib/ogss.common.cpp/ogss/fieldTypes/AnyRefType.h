@@ -12,6 +12,10 @@
 #include <memory>
 
 namespace ogss {
+    namespace api {
+        class File;
+    }
+
     using streams::InStream;
     namespace fieldTypes {
 
@@ -24,6 +28,7 @@ namespace ogss {
          * will then be unique and we no longer have to care for identical copies
          */
         class AnyRefType : public BuiltinFieldType<void *, 8> {
+            internal::StringPool *const string;
             /**
              * @note pools in this vector are owned by annotation, as long as owner is nullptr.
              * That way, we can omit unique_pointers.
@@ -33,13 +38,17 @@ namespace ogss {
              * annotations will not be queried from outside, thus we can directly use char* obtained from
              * skill string pointers
              */
-            File *owner;
+            api::File *owner;
 
         public:
-            AnyRefType(std::vector<internal::AbstractPool *> *fdts)
-                    : fdts(fdts), owner(nullptr) {}
+            AnyRefType(internal::StringPool *string, std::vector<internal::AbstractPool *> *fdts)
+                    : string(string), fdts(fdts), owner(nullptr) {}
 
             virtual ~AnyRefType() {
+                if (!owner) {
+                    for (const auto p : *fdts)
+                        delete p;
+                }
             }
 
             api::Box r(streams::InStream &in) const final {
@@ -48,9 +57,10 @@ namespace ogss {
                 if (!t)
                     return r;
 
-                ObjectID id = (ObjectID) in.v32();
+                const ObjectID id = (ObjectID) in.v32();
+                if (1 == t)
+                    return string->get(id);
 
-                SK_TODO;
                 // TODO likely not even close to correct!
                 r.anyRef = fdts->at(t - 2)->getAsAnnotation(id);
 
@@ -76,6 +86,8 @@ namespace ogss {
             virtual bool requiresDestruction() const {
                 return false;
             }
+
+            friend class api::File;
         };
     }
 }
