@@ -10,7 +10,7 @@
 
 namespace ogss {
     namespace internal {
-        class AbstractEnumPool : public FieldType {
+        class AbstractEnumPool : public fieldTypes::FieldType {
         public:
             /**
              * Last value used for writing for loops over known values.
@@ -18,31 +18,33 @@ namespace ogss {
              */
             const EnumBase last;
 
-            const String name;
+            const api::String name;
 
             /**
              * turn an enum constant into a proxy
              * @return nullptr, if the value is not legal (including UNKNOWN)
              */
-            virtual AbstractEnumProxy *proxy(EnumBase target) const = 0;
+            virtual api::AbstractEnumProxy *proxy(EnumBase target) const = 0;
 
             /**
              * @return begin of all instances
              */
-            virtual AbstractEnumProxy *begin() = 0;
+            virtual api::AbstractEnumProxy **begin() = 0;
 
             /**
              * @return end of all instances
              */
-            virtual AbstractEnumProxy *end() = 0;
+            virtual api::AbstractEnumProxy **end() = 0;
 
         protected:
-            AbstractEnumPool(int tid, String name, EnumBase last)
+            AbstractEnumPool(int tid, const api::String name, const EnumBase last)
                     : FieldType(tid), last(last), name(name) {};
         };
 
+        struct Creator;
+
         template<typename T>
-        class EnumPool : public AbstractPool {
+        class EnumPool : public AbstractEnumPool {
             /**
              * values as seen from the combined specification
              */
@@ -62,17 +64,17 @@ namespace ogss {
             /**
              * @note Shall only be called by generated PBs!
              */
-            EnumPool(int tid, String name, const std::vector<String> &foundValues,
-                     const String *known, const T last)
-                    : AbstractPool(tid, name, last), values(), fileValues(), staticValues() {
+            EnumPool(int tid, api::String name, const std::vector<api::String> &foundValues,
+                     api::String *const known, const EnumBase last)
+                    : AbstractEnumPool(tid, name, last), values(), fileValues(), staticValues() {
 
                 if (foundValues.empty()) {
                     // only known values, none from file
                     // @note we set file values anyway to get sane default values
                     staticValues.reserve(last);
                     values.reserve(last);
-                    for (T i = 0; i < last; i++) {
-                        values[i] = staticValues[i] = new EnumProxy<T>(i, this, known + i, i);
+                    for (EnumBase i = 0; i < last; i++) {
+                        values[i] = staticValues[i] = new api::EnumProxy<T>((T) i, this, known[i], i);
                     }
                 } else {
                     this->fileValues.reserve(foundValues.size());
@@ -80,36 +82,36 @@ namespace ogss {
                     // check if there is a known enum associated with this pool
                     if (!known) {
                         values.reserve(foundValues.size());
-                        for (int i = 0; i < values.length; i++) {
-                            fileValues[i] = values[i] = new EnumProxy<T>(-1, this, foundValues[i], i);
+                        for (size_t i = 0; i < values.size(); i++) {
+                            fileValues[i] = values[i] = new api::EnumProxy<T>(T::UNKNOWN, this, foundValues[i], i);
                         }
                     } else {
                         staticValues.reserve(last);
                         values.reserve(last);
 
                         // merge file values and statically known values
-                        int id = 0, vi = 0;
-                        T ki = 0;
-                        EnumProxy <T> p;
-                        while ((vi < values.length) | (ki < last)) {
+                        int id = 0, fi = 0;
+                        EnumBase ki = 0;
+                        api::EnumProxy<T> *p;
+                        while ((fi < foundValues.size()) | (ki < last)) {
                             int cmp = ki < last
-                                      ? (vi < values.length
-                                         ? api::ogssLess::javaCMP(values[vi], known[ki].toString())
+                                      ? (fi < foundValues.size()
+                                         ? api::ogssLess::javaCMP(foundValues[fi], known[ki])
                                          : 1)
                                       : -1;
 
                             if (0 == cmp) {
-                                p = new EnumProxy<T>(known[ki], this, values[vi], id++);
-                                fileValues[vi++] = p;
+                                p = new api::EnumProxy<T>((T) ki, this, foundValues[fi], id++);
+                                fileValues[fi++] = p;
                                 staticValues[ki++] = p;
                                 values.push_back(p);
 
                             } else if (cmp < 0) {
-                                p = new EnumProxy<T>(-1, this, values[vi], id++);
-                                fileValues[vi++] = p;
+                                p = new api::EnumProxy<T>(T::UNKNOWN, this, foundValues[fi], id++);
+                                fileValues[fi++] = p;
                                 values.push_back(p);
                             } else {
-                                p = new EnumProxy<T>(known[ki], this, known[ki].toString(), id++);
+                                p = new api::EnumProxy<T>((T) ki, this, known[ki], id++);
                                 staticValues[ki++] = p;
                                 values.push_back(p);
                             }
@@ -117,6 +119,42 @@ namespace ogss {
                     }
                 }
             }
+
+            api::AbstractEnumProxy *proxy(EnumBase target) const final {
+                return staticValues.at(target);
+            }
+
+            api::Box r(streams::InStream &in) const final {
+                api::Box r;
+                r.enumProxy = fileValues.at(in.v32());;
+                return r;
+            }
+
+            /**
+             * This is a bit of a hack, because we allow v to be both, an enum value and an EnumProxy*.
+             */
+            bool w(api::Box v, streams::BufferedOutStream *out) const final {
+                if ((0 <= v.i64) & (v.i64 < staticValues.size())) {
+                    out->v64(v.i64);
+                } else {
+                    // @note v can be null, iff there are no static values
+                    if (v.enumProxy)
+                        out->v64(v.enumProxy->id);
+                    else
+                        out->i8(0);
+                }
+            }
+
+            api::AbstractEnumProxy **begin() final {
+                return (api::AbstractEnumProxy **) values.data();
+            }
+
+            api::AbstractEnumProxy **end() final {
+                return (api::AbstractEnumProxy **) (values.data() + values.size());
+            }
+
+
+            friend struct Creator;
         };
     }
 }

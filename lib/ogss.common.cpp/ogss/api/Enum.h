@@ -55,13 +55,13 @@ namespace ogss {
          * An enum with no known value, i.e. one that is not part of the tool specification.
          */
         enum UnknownEnum : EnumBase {
-            UNKNOWN = (EnumBase) -1
+            UNKNOWN = (EnumBase) - 1
         };
 
         template<typename T>
         class EnumProxy : public AbstractEnumProxy {
             EnumProxy(T constant, internal::EnumPool<T> *owner, String name, ObjectID id)
-                    : AbstractEnumProxy(constant, owner, name, id) {}
+                    : AbstractEnumProxy((EnumBase) constant, owner, name, id) {}
 
             friend class internal::EnumPool<T>;
 

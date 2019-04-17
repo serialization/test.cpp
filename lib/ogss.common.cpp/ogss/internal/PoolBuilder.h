@@ -17,6 +17,8 @@ namespace ogss {
         class FileInputStream;
     }
     namespace internal {
+        class AbstractEnumPool;
+
         class AbstractPool;
 
         class StringPool;
@@ -73,7 +75,8 @@ namespace ogss {
             /**
              * @return values of known enums in ascending order
              */
-            //            Enum<?>[] enumMake(int id);
+            virtual AbstractEnumPool *enumMake(
+                    int id, TypeID index, const std::vector<api::String> &foundValues) const = 0;
 
         protected:
             explicit PoolBuilder(int sifaSize) : sifaSize(sifaSize) {}

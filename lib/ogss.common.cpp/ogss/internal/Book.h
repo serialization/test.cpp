@@ -38,14 +38,15 @@ namespace ogss {
              * a new book that has pre allocated instances for the expected size
              */
             explicit Book(ObjectID expectedSize = defaultPageSize)
-                    : freelist(), pages(), currentPage(new T[expectedSize]),
+                    : freelist(), pages(),
+                      currentPage(new(std::calloc(1, sizeof(T[expectedSize]))) T[expectedSize]),
                       currentPageRemaining(0) {
                 pages.push_back(currentPage);
             }
 
             virtual ~Book() {
                 for (T *page : pages) {
-                    delete[] page;
+                    free(page);
                 }
             }
 
@@ -73,7 +74,7 @@ namespace ogss {
                     return r;
                 } else {
                     // we have to allocate a new page
-                    currentPage = new T[defaultPageSize];
+                    currentPage = new(std::calloc(1, sizeof(T[defaultPageSize]))) T[defaultPageSize];
                     pages.push_back(currentPage);
                     // return first object
                     currentPageRemaining = defaultPageSize - 1;

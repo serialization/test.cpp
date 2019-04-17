@@ -3,6 +3,8 @@
 //
 
 #include "Creator.h"
+#include "EnumPool.h"
+
 #include "../fieldTypes/HullType.h"
 #include "../internal/AutoField.h"
 
@@ -81,20 +83,15 @@ Creator::Creator(const std::string &path, const ogss::internal::PoolBuilder &pb)
     // Construct known enums
     {
         int ki = 0;
-        //TODO EnumPool< ?> r;
+        AbstractEnumPool *r;
         String nextName = pb.enumName(ki);
+        const std::vector<String> foundValues;
         // create remaining known enums
         while (nullptr != nextName) {
-            SK_TODO;
-            //            r = new EnumPool(tid++, nextName, null, pb.enumMake(ki++));
-            //            Strings.add(r.name);
-            //            for (EnumProxy< ?> n :
-            //            r.values) {
-            //                Strings.add(n.name);
-            //            }
-            //            enums.add(r);
-            //            SIFA[nsID++] = r;
-            //            nextName = pb.enumName(ki);
+            r = pb.enumMake(ki++, tid++, foundValues);
+            enums.push_back(r);
+            SIFA[nsID++] = r;
+            nextName = pb.enumName(ki);
         }
     }
 
