@@ -249,7 +249,7 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
         for (int i = 0; i < state->enumCount; i++) {
             internal::AbstractEnumPool *p = state->enums[i];
             out.v64(string->id(p->name));
-            out.v64((int)((EnumPool<api::UnknownEnum> *) p)->values.size());
+            out.v64((int) ((EnumPool<api::UnknownEnum> *) p)->values.size());
             for (AbstractEnumProxy *v : *p) {
                 out.v64(string->id(v->name));
             }
@@ -365,13 +365,11 @@ BufferedOutStream *Writer::writeField(Writer *self, DataField *f) {
         self->errors.emplace_back("write task non-standard crash");
     }
 
-    // return the buffer in any case to ensure that there is a
-    // buffer on error
+    // close buffer and discard it if possible
+    buffer->close();
     if (discard) {
         delete buffer;
-        buffer = nullptr;
-    } else {
-        buffer->close();
+        return nullptr;
     }
 
     return buffer;
@@ -422,13 +420,11 @@ BufferedOutStream *Writer::writeHull(Writer *self, HullType *t) {
         self->errors.push_back("write task non-standard crash");
     }
 
-    // return the buffer in any case to ensure that there is a
-    // buffer on error
+    // close buffer and discard it if possible
+    buffer->close();
     if (discard) {
         delete buffer;
-        buffer = nullptr;
-    } else {
-        buffer->close();
+        return nullptr;
     }
 
     return buffer;

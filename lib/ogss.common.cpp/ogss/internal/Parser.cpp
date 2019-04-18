@@ -325,7 +325,8 @@ void ogss::internal::Parser::TContainer() {
     uint32_t kcc = pb.kcc(ki);
     uint32_t kkind = 0;
     FieldType *kb1, *kb2;
-    // @note using int here means that UCC may only contain TIDs < 2^14
+    //@note using uint means we can accept more types than Java
+    uint32_t lastUCC = 0;
     uint32_t kucc = 0;
     if (-1u != kcc) {
         kkind = (kcc >> 30u) & 3u;
@@ -349,6 +350,12 @@ void ogss::internal::Parser::TContainer() {
             SIFA[nsID++] = r;
             r->fieldID = nextFieldID++;
             containers.push_back(r);
+
+            // check UCC order
+            if (lastUCC > kucc) {
+                ParseException(in.get(), "File is not UCC-ordered.");
+            }
+            lastUCC = kucc;
 
             // move to next kcc
             kcc = pb.kcc(++ki);
@@ -387,6 +394,12 @@ void ogss::internal::Parser::TContainer() {
 
             r->fieldID = nextFieldID++;
             containers.push_back(r);
+
+            // check UCC order
+            if (lastUCC > fucc) {
+                ParseException(in.get(), "File is not UCC-ordered.");
+            }
+            lastUCC = fucc;
         }
         fields.push_back(r);
         fdts.push_back(r);

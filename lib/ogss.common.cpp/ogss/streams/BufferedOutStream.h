@@ -72,7 +72,7 @@ namespace ogss {
             ~BufferedOutStream() {
                 for (auto &b : completed)
                     if (b.size > 0)
-                        delete[] b.begin;
+                        free(b.begin);
             }
 
             static inline bool boolBox(api::Box v, streams::BufferedOutStream *out) {
@@ -86,7 +86,7 @@ namespace ogss {
                     if (current.end == current.begin) {
                         flush();
                     }
-                    current.begin++;
+                    *(current.begin++) = 0;
                 }
 
                 if (v) {
@@ -266,12 +266,14 @@ namespace ogss {
              * Ensure that current is flushed to completed and no dead memory would be leaked.
              */
             void close() {
-                int p = FileOutputStream::BUFFER_SIZE - (current.end - current.begin);
-                if (p) {
-                    completed.emplace_back(Buffer({current.begin - p, current.end, p}));
-                    bytesWriten += p;
-                } else {
-                    delete[] current.begin;
+                if (current.begin) {
+                    int p = FileOutputStream::BUFFER_SIZE - (current.end - current.begin);
+                    if (p) {
+                        completed.emplace_back(Buffer({current.begin - p, current.end, p}));
+                        bytesWriten += p;
+                    } else {
+                        free(current.begin);
+                    }
                 }
             }
         };

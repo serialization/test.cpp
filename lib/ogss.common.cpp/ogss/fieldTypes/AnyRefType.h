@@ -61,7 +61,6 @@ namespace ogss {
                 if (1 == t)
                     return string->get(id);
 
-                // TODO likely not even close to correct!
                 r.anyRef = fdts->at(t - 2)->getAsAnnotation(id);
 
                 return r;
@@ -70,7 +69,7 @@ namespace ogss {
             bool w(api::Box target, streams::BufferedOutStream *out) const final {
                 if (target.anyRef) {
                     if (Object *ref = dynamic_cast<Object *>(target.anyRef)) {
-                        out->v64(owner->pool(ref)->typeID);
+                        out->v64(owner->pool(ref)->typeID - 8);
                         out->v64(target.anyRef->id);
                     } else {
                         out->i8(1);

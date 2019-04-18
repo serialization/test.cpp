@@ -5,6 +5,8 @@
 #include "AbstractPool.h"
 #include "UnknownObject.h"
 #include "Pool.h"
+#include "AutoField.h"
+#include "DataField.h"
 #include "../iterators/TypeHierarchyIterator.h"
 
 using namespace ogss;
@@ -27,17 +29,19 @@ ogss::internal::AbstractPool::AbstractPool(
     dataFields(),
     afCount(afCount),
     autoFields(afCount ? new AutoField *[afCount] : noAutoFields) {
+
+    for (int i = 0; i < afCount; i++)
+        autoFields[i] = nullptr;
 }
 
 internal::AbstractPool::~AbstractPool() {
-    if (restrictions)
-        delete restrictions;
+    delete restrictions;
 
     for (auto f : dataFields)
         delete f;
 
     if (afCount) {
-        for (int i = 0; i < afCount; i++)
+        for (size_t i = 0; i < afCount; i++)
             delete autoFields[i];
         delete[] autoFields;
     }
