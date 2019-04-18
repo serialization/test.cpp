@@ -18,15 +18,15 @@ TEST(AgeReadTest, ReadAge) {
         sf->Age->get(i);
     }
     ASSERT_EQ(nullptr, sf->Age->get(0));
-    ASSERT_EQ(1, sf->Age->get(1)->getAge());
-    ASSERT_EQ(28, sf->Age->get(2)->getAge());
+    ASSERT_EQ(30, sf->Age->get(1)->getAge());
+    ASSERT_EQ(2, sf->Age->get(2)->getAge());
 }
 
 TEST(AgeReadTest, ReadAgeForachAPI) {
     auto sf = std::unique_ptr<File>(
             File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
-    const char *as = "\x01\x1c";
+    const char *as = "\x1e\x02";
     for (auto &age : *sf->Age) {
         ASSERT_EQ(*as++, age.getAge()) << "found wrong age";
     }
@@ -37,7 +37,7 @@ TEST(AgeReadTest, ReadAgeForachIterator) {
     auto sf = std::unique_ptr<File>(
             File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
-    const char *as = "\x01\x1c";
+    const char *as = "\x1e\x02";
     for (const auto &age : sf->Age->all()) {
         ASSERT_EQ(*as++, age.getAge()) << "found wrong age";
     }
@@ -64,7 +64,7 @@ TEST(AgeReadTest, ReadAgeWhileIterator) {
     auto sf = std::unique_ptr<File>(
             File::open("../../src/test/resources/binarygen/[[all]]/accept/twoAges.sg"));
     ASSERT_EQ(2, sf->Age->size());
-    const char *as = "\x01\x1c";
+    const char *as = "\x1e\x02";
 
     auto vs = sf->Age->begin();
     while (vs.hasNext()) {
