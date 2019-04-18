@@ -30,8 +30,7 @@ namespace ogss {
         class AnyRefType : public BuiltinFieldType<void *, 8> {
             internal::StringPool *const string;
             /**
-             * @note pools in this vector are owned by annotation, as long as owner is nullptr.
-             * That way, we can omit unique_pointers.
+             * Used to read annotations from file.
              */
             std::vector<internal::AbstractPool *> *const fdts;
             /**
@@ -44,12 +43,7 @@ namespace ogss {
             AnyRefType(internal::StringPool *string, std::vector<internal::AbstractPool *> *fdts)
                     : string(string), fdts(fdts), owner(nullptr) {}
 
-            virtual ~AnyRefType() {
-                if (!owner) {
-                    for (const auto p : *fdts)
-                        delete p;
-                }
-            }
+            virtual ~AnyRefType() {}
 
             api::Box r(streams::InStream &in) const final {
                 api::Box r = {};

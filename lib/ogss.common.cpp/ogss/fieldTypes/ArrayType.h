@@ -65,6 +65,7 @@ namespace ogss {
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}
 
             ~ArrayType() final {
+                delete in;
                 for (void *v : idMap)
                     delete (api::Array<T> *) v;
             }

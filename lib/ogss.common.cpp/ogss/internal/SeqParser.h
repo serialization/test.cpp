@@ -18,6 +18,8 @@ namespace ogss {
         class SeqParser final : public Parser {
             SeqParser(const std::string &path, streams::FileInputStream *in, const PoolBuilder &pb);
 
+            ~SeqParser() final = default;
+
             void typeBlock() final;
 
             void processData() final;

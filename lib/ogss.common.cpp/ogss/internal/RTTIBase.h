@@ -12,7 +12,10 @@ namespace ogss {
          * @author Timm Felden
          */
         struct RTTIBase {
-            virtual ~RTTIBase() {};
+            virtual ~RTTIBase() = default;
+
+        protected:
+            RTTIBase() = default;
         };
     }
 }

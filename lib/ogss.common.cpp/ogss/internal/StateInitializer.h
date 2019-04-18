@@ -42,8 +42,8 @@ namespace ogss {
             std::vector<AbstractEnumPool *> enums;
 
             // complex builtin types
-            StringPool *Strings;
-            AnyRefType *AnyRef;
+            StringPool *strings;
+            AnyRefType *const anyRef;
 
             /**
              * State Initialization of Fields Array. We will memcpy the variable part of the array into the first field to

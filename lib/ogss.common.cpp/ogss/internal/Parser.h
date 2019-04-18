@@ -52,6 +52,8 @@ namespace ogss {
 
             Parser(const std::string &path, streams::FileInputStream *in, const PoolBuilder &pb);
 
+            ~Parser() override = default;
+
             static void ParseException(streams::InStream *in, const std::string &msg);
 
             virtual void typeBlock() = 0;

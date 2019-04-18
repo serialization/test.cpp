@@ -23,6 +23,8 @@ namespace ogss {
             SingleArgumentType(TypeID tid, uint32_t kcc, FieldType *const base)
                     : HullType(tid, kcc), in(nullptr), base(base) {};
 
+            ~SingleArgumentType() override = default;
+
         public:
             FieldType *const base;
 

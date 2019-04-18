@@ -3,6 +3,7 @@
 //
 
 #include <assert.h>
+#include <iostream>
 #include "StringPool.h"
 #include "AbstractStringKeeper.h"
 
@@ -161,4 +162,6 @@ bool internal::StringPool::write(ogss::streams::BufferedOutStream *out) {
 
 void internal::StringPool::allocateInstances(int count, ogss::streams::MappedInStream *in) {
     S(count, in);
+    std::cerr << in << std::endl;
+    delete in;
 }

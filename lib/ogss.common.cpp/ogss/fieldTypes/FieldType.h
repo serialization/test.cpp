@@ -26,10 +26,10 @@ namespace ogss {
         class FieldType : public internal::RTTIBase {
 
         protected:
-            FieldType(const TypeID typeID) : typeID(typeID) {}
+            explicit FieldType(const TypeID typeID) : typeID(typeID) {}
 
         public:
-            virtual ~FieldType() {}
+            ~FieldType() override = default;
 
             //! the id of this type
             const TypeID typeID;

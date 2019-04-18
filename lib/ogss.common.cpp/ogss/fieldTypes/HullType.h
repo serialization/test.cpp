@@ -15,6 +15,9 @@
 #include "../streams/InStream.h"
 
 namespace ogss {
+    namespace api {
+        class File;
+    }
     namespace internal {
         class StateInitializer;
 
@@ -118,6 +121,8 @@ namespace ogss {
                 idMap.push_back(nullptr);
             }
 
+            ~HullType() override = default;
+
             /**
              * Return the id of the argument ref. This method is thread-safe. The id returned by this function does not change
              * per invocation.
@@ -167,6 +172,8 @@ namespace ogss {
             virtual void writeDecl(streams::BufferedOutStream &out) const {}
 
             friend class AnyRefType;
+
+            friend class api::File;
 
             friend class internal::Creator;
 

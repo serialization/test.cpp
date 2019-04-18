@@ -18,6 +18,8 @@ namespace ogss {
          */
         struct Creator final : public StateInitializer {
             explicit Creator(const std::string &path, const PoolBuilder &pb);
+
+            ~Creator() final = default;
         };
     }
 }

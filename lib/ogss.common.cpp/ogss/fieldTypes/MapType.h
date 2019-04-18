@@ -72,6 +72,7 @@ namespace ogss {
                     : HullType(tid, kcc), in(nullptr), keyType(keyType), valueType(valueType) {};
 
             ~MapType() final {
+                delete in;
                 for (void *v : idMap)
                     delete (api::Map<K, V> *) v;
             }

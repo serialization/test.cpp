@@ -3,13 +3,13 @@
 //
 
 #include "../fieldTypes/AnyRefType.h"
+#include "../internal/EnumPool.h"
 #include "../internal/StateInitializer.h"
 #include "../internal/Writer.h"
 #include "../streams/FileOutputStream.h"
 #include "File.h"
 
 #include <atomic>
-#include <iostream>
 
 using namespace ogss;
 using namespace api;
@@ -31,8 +31,8 @@ namespace ogss {
 
 File::File(internal::StateInitializer *init)
         : guard(*init->guard),
-          strings(init->Strings),
-          anyRef(init->AnyRef),
+          strings(init->strings),
+          anyRef(init->anyRef),
           classCount(init->classes.size()),
           classes(new AbstractPool *[classCount]),
           containerCount(init->containers.size()),
@@ -46,8 +46,7 @@ File::File(internal::StateInitializer *init)
           SIFA({}) {
 
     // release complex builtin types
-    init->Strings = nullptr;
-    init->AnyRef = nullptr;
+    init->strings = nullptr;
     anyRef->owner = this;
 
     for (size_t i = 0; i < classCount; i++) {

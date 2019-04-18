@@ -42,11 +42,11 @@ void ogss::internal::Parser::parseFile(FileInputStream *in) {
 
     // S
     try {
-        fields.push_back(Strings);
+        fields.push_back(strings);
         int count = in->v32();
 
         if (0 != count) {
-            in->jump(Strings->S(count, in));
+            in->jump(strings->S(count, in));
         }
     } catch (std::exception &e) {
         ParseException(in, std::string("corrupted string block") += e.what());
@@ -103,7 +103,7 @@ void ogss::internal::Parser::typeDefinitions() {
         // read next pool from file if required
         if (moreFile) {
             // name
-            name = Strings->r(*in).string;
+            name = strings->r(*in).string;
             if (!name) {
                 ParseException(in.get(), "corrupted file: nullptr in type name");
             }
@@ -298,9 +298,9 @@ FieldType *ogss::internal::Parser::fieldType() {
         case 7:
             return (FieldType *) &fieldTypes::F64;
         case 8:
-            return AnyRef;
+            return anyRef;
         case 9:
-            return Strings;
+            return strings;
         default:
             return fdts.at(typeID - 10);
     }
@@ -415,7 +415,7 @@ void ogss::internal::Parser::TEnum() {
     AbstractEnumPool *r;
     // create enums from file
     for (int count = in->v32(); count != 0; count--) {
-        String name = Strings->r(*in).string;
+        String name = strings->r(*in).string;
         int vcount = in->v32();
         if (vcount <= 0)
             ParseException(in.get(), std::string("Enum ") + *name + " is zero-sized.");
@@ -423,7 +423,7 @@ void ogss::internal::Parser::TEnum() {
         std::vector<api::String> vs;
         vs.reserve(vcount);
         for (auto i = vcount; i != 0; i--) {
-            vs.push_back(Strings->r(*in).string);
+            vs.push_back(strings->r(*in).string);
         }
 
         int cmp = nextName ? api::ogssLess::javaCMP(name, nextName) : -1;
@@ -479,7 +479,7 @@ void ogss::internal::Parser::readFields(ogss::AbstractPool *p) {
     String kfn = p->KFN(0);
     while (0 != idx--) {
         // read field
-        const String name = Strings->r(*in).string;
+        const String name = strings->r(*in).string;
         FieldType *t = fieldType();
         std::unordered_set<restrictions::FieldRestriction *> *attr;
         {

@@ -67,6 +67,7 @@ namespace ogss {
                     : SingleArgumentType(tid, kcc, base), in(nullptr) {}
 
             ~SetType() final {
+                delete in;
                 for (void *v : idMap)
                     delete (api::Set<T> *) v;
             }

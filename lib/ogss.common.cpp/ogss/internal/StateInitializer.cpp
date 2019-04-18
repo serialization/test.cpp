@@ -2,21 +2,23 @@
 // Created by Timm Felden on 28.03.19.
 //
 
-#include "StateInitializer.h"
 #include "Creator.h"
+#include "EnumPool.h"
+#include "SeqParser.h"
+#include "StateInitializer.h"
+
 #include "../internal/StringPool.h"
 #include "../fieldTypes/AnyRefType.h"
 #include "../fieldTypes/BuiltinFieldType.h"
 #include "../fieldTypes/SingleArgumentType.h"
 #include "../fieldTypes/MapType.h"
-#include "SeqParser.h"
 
 using namespace ogss::internal;
 using namespace ogss::fieldTypes;
 
 StateInitializer *StateInitializer::make(
         const std::string &path, const PoolBuilder &pb, int mode) {
-    std::unique_ptr<StateInitializer> init;
+    std::unique_ptr<StateInitializer> init(nullptr);
     if (mode & api::ReadMode::create)
         init.reset(new Creator(path, pb));
     else {
@@ -40,8 +42,8 @@ StateInitializer::StateInitializer(const std::string &path, FileInputStream *in,
         : path(path), in(in), canWrite(true),
           guard(),
           classes(), containers(), enums(),
-          Strings(new StringPool(in, pb.getSK())),
-          AnyRef(new AnyRefType(Strings, &classes)),
+          strings(new StringPool(in, pb.getSK())),
+          anyRef(new AnyRefType(strings, &classes)),
           SIFA(new FieldType *[pb.sifaSize]),
           sifaSize(pb.sifaSize),
           nsID(10),
@@ -55,8 +57,8 @@ StateInitializer::StateInitializer(const std::string &path, FileInputStream *in,
     SIFA[5] = (FieldType *) &V64;
     SIFA[6] = (FieldType *) &F32;
     SIFA[7] = (FieldType *) &F64;
-    SIFA[8] = AnyRef;
-    SIFA[9] = Strings;
+    SIFA[8] = anyRef;
+    SIFA[9] = strings;
 }
 
 void StateInitializer::fixContainerMD() {
@@ -82,8 +84,21 @@ void StateInitializer::fixContainerMD() {
 }
 
 StateInitializer::~StateInitializer() {
-    delete Strings;
-    delete AnyRef;
+    // delete all accumulated type information iff the state initializer has not been consumed
+    if (strings) {
+        delete strings;
+        delete anyRef;
+
+        for (auto c : classes) {
+            delete c;
+        }
+        for (auto c : containers) {
+            delete c;
+        }
+        for (auto c : enums) {
+            delete c;
+        }
+    }
 
     delete[] SIFA;
 }
