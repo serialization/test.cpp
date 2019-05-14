@@ -9,33 +9,56 @@ using namespace ogss::internal;
 
 namespace ogss {
     namespace internal {
-        class SeqReadTask final : public RTTIBase {
+        struct Job {
+            virtual ~Job() = default;
+
+            virtual void run() = 0;
+        };
+
+        class SeqReadTask final : public Job {
+            const BlockID block;
+
             DataField *const f;
 
-            streams::MappedInStream *const map;
+            streams::MappedInStream *const in;
 
         public:
-            SeqReadTask(DataField *f, streams::MappedInStream *in)
-                    : f(f), map(in) {
+            SeqReadTask(DataField *f, BlockID block, streams::MappedInStream *in)
+                    : block(block), f(f), in(in) {
             }
 
             ~SeqReadTask() final {
-                delete map;
+                delete in;
             }
 
-            void run() {
+            void run() final {
                 AbstractPool *const owner = f->owner;
                 const int bpo = owner->bpo;
-                const int end = bpo + owner->cachedSize;
+                const int first = block * ogss::FD_Threshold;
+                const int last = std::min(owner->cachedSize, first + ogss::FD_Threshold);
 
-                if (map->eof()) {
-                    // TODO default initialization; this is a nop for now in Java
-                } else {
-                    f->read(bpo, end, *map);
-                }
+                f->read(bpo + first, bpo + last, *in);
 
-                if (!map->eof() && !(dynamic_cast<LazyField *>(f)))
+                if (!in->eof() && !(dynamic_cast<LazyField *>(f)))
                     throw std::out_of_range("read task did not consume InStream");
+            }
+        };
+
+        class SHRT final : public Job {
+            const BlockID block;
+            HullType *const t;
+            streams::MappedInStream *const in;
+        public:
+
+            SHRT(HullType *t, int block, streams::MappedInStream *in)
+                    : block(block), t(t), in(in) {}
+
+            ~SHRT() final {
+                delete in;
+            }
+
+            void run() override {
+                t->read(block, in);
             }
         };
     }
@@ -105,56 +128,47 @@ void SeqParser::typeBlock() {
 }
 
 void SeqParser::processData() {
-    // we expect one HD-entry per field
-    const int jobCount = fields.size();
-    int remaining = jobCount;
-    std::unique_ptr<RTTIBase *[]> jobs(new RTTIBase *[remaining]);
+    // we expect one HD-entry per field, but an arbitrary amount of entries can be encountered
+    std::vector<Job *> jobs;
+    jobs.reserve(fields.size());
 
-    while ((--remaining >= 0) & !in->eof()) {
-        // create the map directly and use it for subsequent read-operations to avoid costly position and size
+    while (!in->eof()) {
+        // create the in directly and use it for subsequent read-operations to avoid costly position and size
         // readjustments
         streams::MappedInStream *const map = in->jumpAndMap(in->v32() + 2);
 
         const int id = map->v32();
         RTTIBase *const f = fields.at(id);
-        // overwrite entry to prevent duplicate read of the same field
-        fields[id] = nullptr;
+
+        // TODO add a countermeasure against duplicate buckets / fieldIDs
 
         if (auto p = dynamic_cast<HullType *>(f)) {
             const int count = map->v32();
 
             // start hull allocation job
-            p->allocateInstances(count, map);
+            BlockID block = p->allocateInstances(count, map);
 
             // create hull read data task except for StringPool which is still lazy per element and eager per offset
             if (8 != p->typeID) {
-                jobs.get()[id] = p;
-            } else {
-                jobs.get()[id] = nullptr;
+                jobs.push_back(new SHRT(p, block, map));
             }
 
         } else if (auto fd = dynamic_cast<DataField *>(f)) {
+            BlockID block = fd->owner->cachedSize >= ogss::FD_Threshold ? map->v32() : 0;
+
             // create job with adjusted size that corresponds to the * in the specification (i.e. exactly the data)
-            auto task = new SeqReadTask(fd, map);
-            jobs.get()[id] = task;
+            jobs.push_back(new SeqReadTask(fd, block, map));
         } else {
             delete map;
-            ParseException(in.get(), "created the same read job twice");
+            ParseException(in.get(), "corrupted HD block");
         }
     }
 
     // perform read tasks
-    for (int i = 0; i < jobCount; i++) {
-        // only fields with overwritten IDs contain jobs
-        if (nullptr == fields[i]) {
-            RTTIBase *j = jobs[i];
-            if (auto rt = dynamic_cast<SeqReadTask *>(j)) {
-                rt->run();
-                delete rt;
-            } else if (auto ht = dynamic_cast<HullType *>(j)) {
-                ht->read();
-            }
-        }
-        // TODO else default initialization!
+    for (Job *j : jobs) {
+        j->run();
+        delete j;
+
+        // TODO default initialization!
     }
 }

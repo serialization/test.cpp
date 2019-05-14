@@ -253,12 +253,25 @@ namespace ogss {
              * @note does not move position
              * @note the offset is absolute and can be before position
              */
-            String string(uint32_t offset, uint32_t length, ObjectID id) {
-                ensure((bool) (id > 0)
-                       & (bool) (offset > 0)
+            String string(uint32_t offset, uint32_t length) {
+                ensure((bool) (offset > 0)
                        & (bool) ((uint8_t *) base + offset + length <= (uint8_t *) end));
 
                 String rval = new std::string((const char *) base + offset, length);
+                return rval;
+            }
+
+            /**
+             * read a literal string from the stream
+             * @note the caller owns the string!
+             * @note does move position
+             */
+            String literalString() {
+                uint32_t length = v32();
+                ensure(position + length < end);
+
+                String rval = new std::string((const char *) position, length);
+                position += length;
                 return rval;
             }
         };

@@ -42,7 +42,7 @@ Writer::Writer(api::File *state, streams::FileOutputStream &out)
         StringPool *const sp = (StringPool *) state->strings;
         sp->resetIDs();
 
-        // create inverse map
+        // create inverse in
         const int count = sp->knownStrings.size();
         sp->idMap.reserve(count);
         sp->IDs.reserve(count);
@@ -275,7 +275,7 @@ uint32_t Writer::writeTF(api::File *const state, BufferedOutStream &out) {
 }
 
 void Writer::compress(AbstractPool *const base, int *bpos) {
-    // create our part of the bpo map
+    // create our part of the bpo in
     {
         int next = 0;
         AbstractPool *p = base;

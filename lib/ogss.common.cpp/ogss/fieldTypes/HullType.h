@@ -27,6 +27,8 @@ namespace ogss {
 
         class SeqParser;
 
+        class SHRT;
+
         class Writer;
     }
     namespace fieldTypes {
@@ -62,7 +64,7 @@ namespace ogss {
              * @note If another field reduces deps to 0 it has to start a write job for this type.
              * @note This is in essence reference counting on an acyclic graph while writing data to disk.
              */
-            std::atomic_uint32_t deps;
+            std::atomic<uint32_t> deps;
 
             /**
              * The maximal, i.e. static, number of serialized fields depending on this type.
@@ -93,11 +95,10 @@ namespace ogss {
             void resetIDs() {
                 IDs.clear();
 
-                // throw away id map, as it is no longer valid
+                // throw away id in, as it is no longer valid
                 idMap.clear();
                 idMap.push_back(nullptr);
             }
-
 
             /**
              * Read the hull data from the stream. Abstract, because the inner loop is type-dependent anyway.
@@ -105,7 +106,7 @@ namespace ogss {
              * @note the fieldID is written by the caller
              * @return true iff hull shall be discarded (i.e. it is empty)
              */
-            virtual void read() = 0;
+            virtual void read(BlockID block, streams::MappedInStream *in) = 0;
 
             /**
              * Write the hull into the stream. Abstract, because the inner loop is type-dependent anyway.
@@ -164,7 +165,7 @@ namespace ogss {
 
         protected:
 
-            virtual void allocateInstances(int count, streams::MappedInStream *map) = 0;
+            virtual BlockID allocateInstances(int count, streams::MappedInStream *map) = 0;
 
             /**
              * Write the TCo declaration for this type
@@ -180,6 +181,8 @@ namespace ogss {
             friend class internal::Parser;
 
             friend class internal::SeqParser;
+
+            friend class internal::SHRT;
 
             friend class internal::StateInitializer;
 

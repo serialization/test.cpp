@@ -107,7 +107,7 @@ TEST(AgeReadTest, CheckLBPOTypeHierarchyOrder) {
     };
 
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/localBasePoolOffset.sf"));
+            File::open("../../src/test/resources/binarygen/[[empty]]/accept/poly.sg"));
     ASSERT_EQ(5, (int) sf->size());
     for (auto t : *sf) {
         checkType(t, "a", "abdc");
@@ -134,7 +134,7 @@ TEST(AgeReadTest, ReadLBPOCheckTypeOrder) {
     };
 
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/localBasePoolOffset.sf"));
+            File::open("../../src/test/resources/binarygen/[[empty]]/accept/poly.sg"));
     ASSERT_EQ(5, (int) sf->size());
     for (auto t : *sf) {
         checkType(t, "a", "aaabbbbbdddcc");
@@ -160,9 +160,10 @@ TEST(AgeReadTest, ReadLBPOCheckStaticInstances) {
     };
 
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/localBasePoolOffset.sf"));
+            File::open("../../src/test/resources/binarygen/[[empty]]/accept/poly.sg"));
     ASSERT_EQ(5, (int) sf->size());
     for (auto t : *sf) {
+        // TODO indices are likely wrong, because the SKilL block layout is gone
         checkType(t, "a", "\x01\x02\x0B");
         checkType(t, "b", "\x03\x04\x05\x07\x08");
         checkType(t, "c", "\x06\x0D");
@@ -187,7 +188,7 @@ TEST(AgeReadTest, ReadLBPOCheckAllocationOrder) {
     };
 
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/localBasePoolOffset.sf"));
+            File::open("../../src/test/resources/binarygen/[[empty]]/accept/poly.sg"));
     ASSERT_EQ(5, (int) sf->size());
     for (auto t : *sf) {
         checkType(t, "a", "aabbbcbbddadc");
@@ -199,7 +200,7 @@ TEST(AgeReadTest, ReadLBPOCheckAllocationOrder) {
 
 TEST(AgeReadTest, ReadDate) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/date.sf"));
+            File::open("../../src/test/resources/binarygen/[[empty]]/accept/numbers.sg"));
     ASSERT_NE(nullptr, sf->Age);
     ASSERT_EQ(0, (int) sf->Age->size());
     for (auto i = sf->Age->size(); i > 0; i--) {
@@ -210,7 +211,7 @@ TEST(AgeReadTest, ReadDate) {
 
 TEST(AgeReadTest, ReadWriteDate) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/genbinary/[[empty]]/accept/date.sf"));
+            File::open("../../src/test/resources/binarygen/[[empty]]/accept/numbers.sg"));
     ASSERT_NE(nullptr, sf->Age);
     ASSERT_EQ(0, (int) sf->Age->size());
     sf->check();

@@ -76,7 +76,6 @@ namespace ogss {
             virtual void processData() = 0;
 
             friend struct StateInitializer;
-
         };
     }
 }

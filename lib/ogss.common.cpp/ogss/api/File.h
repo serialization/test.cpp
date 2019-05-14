@@ -12,7 +12,6 @@
 #include "../fieldTypes/HullType.h"
 #include "../internal/AbstractPool.h"
 #include "../streams/FileInputStream.h"
-#include "StringAccess.h"
 
 namespace ogss {
     namespace internal {
@@ -58,7 +57,7 @@ namespace ogss {
              */
             std::string guard;
 
-            api::StringAccess *const strings;
+            internal::StringPool *const strings;
         protected:
             fieldTypes::AnyRefType *const anyRef;
         public :

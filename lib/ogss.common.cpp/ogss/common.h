@@ -9,6 +9,16 @@
 
 namespace ogss {
     /**
+     * The maximum size of a field data block (2**20)
+     */
+    const int FD_Threshold = 1048576;
+
+    /**
+     * The maximum size of a hull data block (2**14)
+     */
+    const int HD_Threshold = 16384;
+
+    /**
      * keep the skill id type, and thus the number of treatable skill objects, configurable
      */
     typedef int ObjectID;
@@ -17,6 +27,12 @@ namespace ogss {
      * keep the number of types configurable and independent of skill ids
      */
     typedef int TypeID;
+
+    /**
+     * In theory, blockIDs can be up to 2**50 (2**60/2**14).
+     * In practice, they are almost always smaller than 100.
+     */
+    typedef int BlockID;
 
     /**
      * the base type of generated enum constants

@@ -91,8 +91,8 @@ namespace ogss {
             Pool(TypeID TID, AbstractPool *superPool,
                  api::String name, std::unordered_set<TypeRestriction *> *restrictions, int autoFields)
                     : AbstractPool(TID, superPool, name, restrictions, autoFields),
-                      book(nullptr),
                       data(nullptr),
+                      book(nullptr),
                       newObjects() {}
 
             virtual ~Pool() {

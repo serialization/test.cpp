@@ -9,11 +9,15 @@
 #include <vector>
 #include <unordered_set>
 
-#include "../api/StringAccess.h"
-#include "../streams/FileInputStream.h"
 #include "AbstractStringKeeper.h"
+#include "../fieldTypes/HullType.h"
+#include "../streams/FileInputStream.h"
 
 namespace ogss {
+
+    namespace api {
+        class File;
+    }
 
     using namespace api;
     namespace internal {
@@ -28,9 +32,9 @@ namespace ogss {
          *
          * @author Timm Felden
          */
-        class StringPool : public StringAccess {
+        class StringPool final : public fieldTypes::HullType {
 
-            streams::FileInputStream *in;
+            ogss::streams::MappedInStream *in;
 
             /**
              * the set of known strings, including new strings
@@ -46,6 +50,16 @@ namespace ogss {
              * Strings known at compile time. Literals are not deleted and cannot be removed from a pool.
              */
             const AbstractStringKeeper *const literals;
+
+            /**
+             * Strings used as names of types, fields or enum constants.
+             *
+             * @note literal strings are respective to the merged type system
+             *
+             * @note literal strings can alias literals->strings, in which case it must not be freed
+             */
+            const String *literalStrings;
+            size_t literalStringCount;
 
             /**
              * get string by ID
@@ -65,23 +79,27 @@ namespace ogss {
              */
             ObjectID lastID;
 
-            StringPool(streams::FileInputStream *in, const AbstractStringKeeper *sk);
+            explicit StringPool(const AbstractStringKeeper *sk);
 
-            virtual ~StringPool();
+            ~StringPool() override;
 
         public:
 
             /**
-             * add a string to the pool
+             * convert a const char* to a string reusing already existing strings with the same image
+             * @note this is essentially Javas String.intern()
              */
-            virtual String add(const char *target);
-
-            /**
-             * add a string of given length to the pool
-             *
-             * @note this string may contain null characters
-             */
-            virtual String add(const char *target, int length);
+            api::String add(const char *img) const {
+                auto r = new std::string(img);
+                auto other = knownStrings.find(r);
+                if (other != knownStrings.end()) {
+                    delete r;
+                    return *other;
+                }
+                // else, it is not known yet
+                knownStrings.insert(r);
+                return r;
+            }
 
             api::Box get(ObjectID ID) const {
                 api::Box r;
@@ -102,7 +120,7 @@ namespace ogss {
 
                         // read result
                         uint64_t off = positions[index];
-                        result = in->string(off >> 32LU, (uint32_t) off, index);
+                        result = in->string(off >> 32LU, (uint32_t) off);
 
                         // unify result with known strings
                         auto it = knownStrings.find(result);
@@ -130,14 +148,9 @@ namespace ogss {
 
         private:
 
-            /**
-             * Read a string block
-             *
-             * @return the position behind the string block
-             */
-            size_t S(int count, ogss::streams::InStream *in);
+            void readSL(ogss::streams::FileInputStream *in);
 
-            void read() final;
+            void read(BlockID block, streams::MappedInStream *in) final;
 
             /// id offset of the actual hull (this type also has two areas where instances are stored)
             int hullOffset;
@@ -146,7 +159,9 @@ namespace ogss {
 
             bool write(ogss::streams::BufferedOutStream *) final;
 
-            void allocateInstances(int, ogss::streams::MappedInStream *) final;
+            BlockID allocateInstances(int, ogss::streams::MappedInStream *) final;
+
+            friend class api::File;
 
             friend class Parser;
 

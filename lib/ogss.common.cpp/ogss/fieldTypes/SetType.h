@@ -20,18 +20,33 @@ namespace ogss {
          */
         template<typename T>
         class SetType final : public SingleArgumentType {
-            streams::MappedInStream *in;
 
-            void allocateInstances(int count, streams::MappedInStream *map) final {
-                in = map;
+            BlockID allocateInstances(int count, streams::MappedInStream *in) final {
+
+                // check for blocks
+                if (count >= HD_Threshold) {
+                    const BlockID block = in->v32();
+
+                    // note: in contrast to Java, there is no easy way to do synchronized(this)
+                    // Also, allocation is faster compared to Java
+                    // Lastly, a container block cannot be dropped if size is nonzero
+                    // Hence, we will allocate all instances in block 0
+
+                    if (block)
+                        return block;
+                    // else, behave as if there were no blocks
+                }
+                // else, no blocks
                 idMap.reserve(count);
                 while (count-- != 0)
                     idMap.push_back(new api::Set<T>());
+                return 0;
             }
 
-            void read() final {
-                const int count = idMap.size() - 1;
-                for (int i = 1; i <= count; i++) {
+            void read(BlockID block, streams::MappedInStream *in) final {
+                size_t i = block * HD_Threshold;
+                const size_t end = std::min(idMap.size(), i + HD_Threshold);
+                while (++i < end) {
                     auto xs = (api::Set<T> *) idMap[i];
                     int s = in->v32();
                     xs->reserve(s);
@@ -64,16 +79,15 @@ namespace ogss {
 
         public:
             SetType(TypeID tid, uint32_t kcc, FieldType *const base)
-                    : SingleArgumentType(tid, kcc, base), in(nullptr) {}
+                    : SingleArgumentType(tid, kcc, base) {}
 
             ~SetType() final {
-                delete in;
                 for (void *v : idMap)
                     delete (api::Set<T> *) v;
             }
 
             /// simplify code generation
-            inline api::Set<T> *read(streams::InStream &in) {
+            inline api::Set <T> *read(streams::InStream &in) {
                 return (api::Set<T> *) r(in).set;
             }
         };
