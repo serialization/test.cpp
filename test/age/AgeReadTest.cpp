@@ -200,7 +200,7 @@ TEST(AgeReadTest, ReadLBPOCheckAllocationOrder) {
 
 TEST(AgeReadTest, ReadDate) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/binarygen/[[empty]]/accept/numbers.sg"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/numbers.sg"));
     ASSERT_NE(nullptr, sf->Age);
     ASSERT_EQ(0, (int) sf->Age->size());
     for (auto i = sf->Age->size(); i > 0; i--) {
@@ -211,7 +211,7 @@ TEST(AgeReadTest, ReadDate) {
 
 TEST(AgeReadTest, ReadWriteDate) {
     auto sf = std::unique_ptr<File>(
-            File::open("../../src/test/resources/binarygen/[[empty]]/accept/numbers.sg"));
+            File::open("../../src/test/resources/binarygen/[[all]]/accept/numbers.sg"));
     ASSERT_NE(nullptr, sf->Age);
     ASSERT_EQ(0, (int) sf->Age->size());
     sf->check();
