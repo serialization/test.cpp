@@ -1,3 +1,6 @@
+# ogss.common library
+lib/ogss.common.cpp
+
 # Prerequisites
 *.d
 
