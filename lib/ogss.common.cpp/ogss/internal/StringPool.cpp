@@ -14,7 +14,6 @@ internal::StringPool::StringPool(const AbstractStringKeeper *sk)
         : HullType(9, -1), in(nullptr), knownStrings(), literals(sk),
           literalStrings(sk->strings), literalStringCount(sk->size),
           positions(nullptr), lastID(0) {
-    idMap.push_back(nullptr);
 
     knownStrings.reserve(sk->size);
     for (ObjectID i = 0; i < sk->size; i++)
