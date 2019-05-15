@@ -3,6 +3,7 @@
 //
 
 #include <assert.h>
+
 #include "StringPool.h"
 #include "AbstractStringKeeper.h"
 
@@ -12,7 +13,7 @@ using api::String;
 internal::StringPool::StringPool(const AbstractStringKeeper *sk)
         : HullType(9, -1), in(nullptr), knownStrings(), literals(sk),
           literalStrings(sk->strings), literalStringCount(sk->size),
-          idMap(), positions(nullptr), lastID(0) {
+          positions(nullptr), lastID(0) {
     idMap.push_back(nullptr);
 
     knownStrings.reserve(sk->size);
@@ -73,11 +74,12 @@ void internal::StringPool::readSL(ogss::streams::FileInputStream *in) {
         if (0 <= cmp) {
             if (0 == cmp) {
                 // discard next
+                delete next;
                 next = literals->strings[ki++];
             }
             // else, use next
             merged.push_back(next);
-            idMap.push_back(next);
+            idMap.push_back((void *) next);
 
             // in C++ we have to add literals to known strings, because there is no intern
             knownStrings.insert(next);
@@ -103,10 +105,13 @@ void internal::StringPool::readSL(ogss::streams::FileInputStream *in) {
         literalStrings = arr;
     }
     // else, we can reuse SK (set by constructor to ensure defined behaviour)
+
+    lastID = literalStringCount;
 }
 
 ogss::BlockID internal::StringPool::allocateInstances(int count, ogss::streams::MappedInStream *in) {
     this->in = in;
+    lastID += count;
 
     // read offsets
     auto offsets = new int[count];
@@ -141,26 +146,13 @@ void internal::StringPool::read(BlockID block, streams::MappedInStream *in) {
 
 
 void internal::StringPool::writeLiterals(StringPool *const sp, ogss::streams::FileOutputStream *out) {
-    // count
-    // @note idMap access performance hack
-    sp->hullOffset = sp->idMap.size();
     const int count = sp->hullOffset - 1;
+
     out->v64(count);
-
-    // @note idMap access performance hack
-    if (0 != count) {
-
-        // lengths
-        int i = 0;
-        while (i < count) {
-            out->v64((int) sp->idMap[++i]->size());
-        }
-
-        // data
-        i = 0;
-        while (i < count) {
-            out->put(sp->idMap[++i]);
-        }
+    for (int i = 1; i <= count; i++) {
+        auto s = (String) sp->idMap[i];
+        out->v64((int) s->size());
+        out->put(s);
     }
 }
 
@@ -173,12 +165,13 @@ bool internal::StringPool::write(ogss::streams::BufferedOutStream *out) {
 
     // lengths
     for (int i = 0; i < count; i++) {
-        out->v64((int) idMap[i + hullOffset]->size());
+        const String s = static_cast<String const>(idMap[i + hullOffset]);
+        out->v64((int) s->size());
     }
 
     // data
     for (int i = 0; i < count; i++) {
-        const String s = idMap[i + hullOffset];
+        const String s = static_cast<String const>(idMap[i + hullOffset]);
         out->put(reinterpret_cast<const uint8_t *>(s->c_str()), s->size());
     }
 

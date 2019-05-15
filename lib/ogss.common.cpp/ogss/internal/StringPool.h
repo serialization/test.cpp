@@ -62,11 +62,6 @@ namespace ogss {
             size_t literalStringCount;
 
             /**
-             * get string by ID
-             */
-            mutable std::vector<String> idMap;
-
-            /**
              * ID ⇀ (absolute offset|32, length|32) will be used if idMap contains a nullptr
              *
              * @note there is a fake entry at ID 0
@@ -114,7 +109,7 @@ namespace ogss {
                 if (index <= 0) return nullptr;
                 else if (index > lastID) throw std::out_of_range("index of StringPool::get too large");
                 else {
-                    String result = idMap[index];
+                    String result = static_cast<String>(idMap[index]);
                     if (nullptr == result) {
                         std::lock_guard<std::mutex> readLock(mapLock);
 
@@ -135,7 +130,7 @@ namespace ogss {
                             IDs[result] = index;
                         }
 
-                        idMap[index] = result;
+                        idMap[index] = (void *) result;
                     }
                     return result;
                 }

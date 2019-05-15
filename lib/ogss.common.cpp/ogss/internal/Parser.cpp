@@ -99,7 +99,7 @@ void ogss::internal::Parser::typeDefinitions() {
         // read next pool from file if required
         if (moreFile) {
             // name
-            name = strings->idMap.at(in->v32());
+            name = static_cast<String>(strings->idMap.at(in->v32()));
             if (!name) {
                 ParseException(in.get(), "corrupted file: nullptr in type name");
             }
@@ -411,7 +411,7 @@ void ogss::internal::Parser::TEnum() {
     AbstractEnumPool *r;
     // create enums from file
     for (int count = in->v32(); count != 0; count--) {
-        String name = strings->idMap.at(in->v32());
+        String name = static_cast<String>(strings->idMap.at(in->v32()));
         int vcount = in->v32();
         if (vcount <= 0)
             ParseException(in.get(), std::string("Enum ") + *name + " is zero-sized.");
@@ -419,7 +419,7 @@ void ogss::internal::Parser::TEnum() {
         std::vector<api::String> vs;
         vs.reserve(vcount);
         for (auto i = vcount; i != 0; i--) {
-            vs.push_back(strings->idMap.at(in->v32()));
+            vs.push_back((String) strings->idMap.at(in->v32()));
         }
 
         int cmp = nextName ? api::ogssLess::javaCMP(name, nextName) : -1;
@@ -475,7 +475,7 @@ void ogss::internal::Parser::readFields(ogss::AbstractPool *p) {
     String kfn = p->KFN(0);
     while (0 != idx--) {
         // read field
-        const String name = strings->idMap.at(in->v32());
+        const String name = static_cast<String const>(strings->idMap.at(in->v32()));
         FieldType *t = fieldType();
         std::unordered_set<restrictions::FieldRestriction *> *attr;
         {

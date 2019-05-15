@@ -44,12 +44,15 @@ Writer::Writer(api::File *state, streams::FileOutputStream &out)
 
         // create inverse in
         const int count = sp->knownStrings.size();
+        sp->knownStrings.clear();
         sp->idMap.reserve(count);
         sp->IDs.reserve(count);
-        for (String s : sp->knownStrings) {
+        for (size_t i = 0; i < sp->literalStringCount; i++) {
+            const String s = sp->literalStrings[i];
             sp->IDs[s] = sp->idMap.size();
-            sp->idMap.push_back(s);
+            sp->idMap.push_back((void*)s);
         }
+        sp->hullOffset = sp->idMap.size();
     }
     // write in parallel to writing of TF
     auto SB = std::async(std::launch::async,

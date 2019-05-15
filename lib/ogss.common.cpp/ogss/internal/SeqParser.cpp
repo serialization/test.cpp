@@ -165,10 +165,21 @@ void SeqParser::processData() {
     }
 
     // perform read tasks
-    for (Job *j : jobs) {
-        j->run();
-        delete j;
+    int i = 0;
+    try {
+        for (; i < jobs.size(); i++) {
+            Job *j = jobs[i];
+            j->run();
+            delete j;
 
-        // TODO default initialization!
+            // TODO default initialization!
+        }
+    } catch (std::exception &e) {
+        // delete remaining jobs in case of error
+        for (; i < jobs.size(); i++) {
+            delete jobs[i];
+        }
+
+        throw e;
     }
 }

@@ -30,6 +30,8 @@ namespace ogss {
                     // Lastly, a container block cannot be dropped if size is nonzero
                     // Hence, we will allocate all instances in block 0
 
+                    // TODO the point above is incorrect, as we can use mapLock! (copy to other HullTypes!)
+
                     if (block)
                         return block;
                     // else, behave as if there were no blocks

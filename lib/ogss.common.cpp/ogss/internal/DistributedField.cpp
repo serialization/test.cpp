@@ -55,14 +55,23 @@ void DistributedField::read(int i, const int last, streams::MappedInStream &in) 
 }
 
 bool DistributedField::write(int i, const int last, streams::BufferedOutStream *out) const {
-    SK_TODO;
-    //    auto c = dynamic_cast<const ::ogss::internal::SimpleChunk *>(dataChunks.back());
-    //    // case c : SimpleChunk =>
-    //    auto i = c->bpo;
-    //    const auto end = i + c->count;
-    //    while (i != end) {
-    //        type->w(out, data[i++]);
-    //    }
+    bool drop = true;
+    if (auto bt = dynamic_cast<const fieldTypes::BoolFieldType *>(type)) {
+        SK_TODO;
+        //        BoolOutWrapper wrap = new BoolOutWrapper(out);
+        //        for (; i < h; i++) {
+        //            boolean v = Boolean.TRUE == data.get(d[i]);
+        //            wrap.
+        //            bool(v);
+        //            drop &= !v;
+        //        }
+        //        wrap.unwrap();
+    } else {
+        while (i < last) {
+            drop &= type->w(data[i++], out);
+        }
+    }
+    return drop;
 }
 
 /**
