@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <ogss/internal/UnknownObject.h>
+#include <ogss/iterators/StaticFieldIterator.h>
 #include "../../src/age/File.h"
 #include "../../src/age/StringKeeper.h"
 
@@ -215,6 +216,30 @@ TEST(AgeReadTest, ReadWriteDate) {
     ASSERT_NE(nullptr, sf->Age);
     ASSERT_EQ(0, (int) sf->Age->size());
     sf->check();
-    sf->changePath("/tmp/out.sf");
+    sf->changePath("/tmp/out.sg");
     sf->close();
+}
+
+TEST(AgeReadTest, ReadWriteNumber) {
+    {
+        auto sf = std::unique_ptr<File>(
+                File::open("../../src/test/resources/binarygen/[[all]]/accept/numbers.sg"));
+        ASSERT_NE(nullptr, sf->Age);
+        ASSERT_EQ(0, (int) sf->Age->size());
+        sf->check();
+        sf->changePath("/tmp/out.sg");
+        sf->close();
+    }
+    {
+        auto sf = std::unique_ptr<File>(File::open("/tmp/out.sg"));
+        for (auto p : *sf) {
+            auto xs = p->allObjects();
+            while (xs->hasNext()) {
+                auto x = xs->next();
+                auto fs = p->fields();
+                while (fs.hasNext())
+                    ASSERT_EQ(1234567, fs.next()->getR(x).i64);
+            }
+        }
+    }
 }

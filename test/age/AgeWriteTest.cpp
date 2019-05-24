@@ -20,11 +20,10 @@ TEST(AgeWriteTest, WriteAge) {
         ASSERT_EQ(1, sf->Age->get(1)->getAge());
         ASSERT_EQ(28, sf->Age->get(2)->getAge());
 
-        auto sf2 = File::open(sf->currentPath());
+        std::unique_ptr<File> sf2(File::open(sf->currentPath()));
         ASSERT_EQ(2, sf2->Age->size());
         ASSERT_EQ(1, sf2->Age->get(1)->getAge());
         ASSERT_EQ(28, sf2->Age->get(2)->getAge());
-        delete sf2;
     } catch (ogss::Exception &e) {
         GTEST_FAIL() << "unexpected failure: " << e.what();
     } catch (std::exception &e) {
