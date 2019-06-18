@@ -6,7 +6,7 @@
 using namespace common;
 
 /*
- * write a file, read it such that the type a is known but it's fieds are unknown / lazy.
+ * write a file, read it such that the type a is known but it's fields are unknown / lazy.
  * do nothing, write it and read it again.
  */
 TEST(UnknownWriteTestEmpty, nothing_nothing) {
@@ -29,7 +29,7 @@ TEST(UnknownWriteTestEmpty, nothing_nothing) {
 
 /*
  * make instance of A and write it to file.
- * read file such that the type a is known but it's fieds are unknown / lazy.
+ * read file such that the type a is known but it's fields are unknown / lazy.
  * do nothing, write it and read it again.
  */
 TEST(UnknownWriteTestEmpty, make_nothing) {
@@ -53,7 +53,7 @@ TEST(UnknownWriteTestEmpty, make_nothing) {
 
 /*
  * write no instances to file.
- * read file such that the type a is known but it's fieds are unknown / lazy.
+ * read file such that the type a and its fields are unknown / lazy.
  * make instance of a, write it and read it again.
  */
 TEST(UnknownWriteTestEmpty, nothing_make) {
@@ -78,7 +78,7 @@ TEST(UnknownWriteTestEmpty, nothing_make) {
 
 /*
  * make instance of A and write it to file.
- * read file such that the type a is known but it's fieds are unknown / lazy.
+ * read file such that the type a and its fields are unknown / lazy.
  * make instance of a, write it and read it again.
  */
 TEST(UnknownWriteTestEmpty, make_make) {
