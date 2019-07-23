@@ -2,12 +2,12 @@
 // Created by Sarah Stieß on 28.05.19.
 //
 
-#include <gtest/gtest.h>
-#include "../common/utils.h"
-#include "../../src/age/File.h"
-#include "../../src/empty/File.h"
-#include "../../src/basicTypes/File.h"
 #include "../../lib/ogss.common.cpp/ogss/internal/AbstractPool.h"
+#include "../../src/age/File.h"
+#include "../../src/basicTypes/File.h"
+#include "../../src/empty/File.h"
+#include "../common/utils.h"
+#include <gtest/gtest.h>
 
 using ::age::api::File;
 
@@ -30,8 +30,8 @@ TEST(AgePoolOfTest, PoolOfCaseSensivity) {
     try {
         auto sg = common::tempFile<File>();
 
-
-        ASSERT_EQ(nullptr, sg->pool(ogss::api::String("aGE")));
+        std::string name("aGE");
+        ASSERT_EQ(nullptr, sg->pool(&name));
 
     } catch (ogss::Exception &e) {
         GTEST_FAIL() << "unexpected failure: " << e.what();
@@ -64,7 +64,23 @@ TEST(AgePoolOfTest, PoolOfForeignObject1) {
         auto sg = common::tempFile<File>();
         auto sg1 = common::tempFile<::empty::api::File>();
 
-        ASSERT_EQ(nullptr, sg1->pool(sg->Age->make()));
+        ASSERT_FALSE(sg1->pool(sg->Age->make()));
+
+    } catch (ogss::Exception &e) {
+        GTEST_FAIL() << "unexpected failure: " << e.what();
+    } catch (std::exception &e) {
+        GTEST_FAIL() << "std::exception: " << e.what();
+    } catch (...) {
+        GTEST_FAIL() << "unexpected exception";
+    }
+}
+
+TEST(AgePoolOfTest, PoolOfForeignObject1Contains) {
+    try {
+        auto sg = common::tempFile<File>();
+        auto sg1 = common::tempFile<::empty::api::File>();
+
+        ASSERT_FALSE(sg1->contains(sg->Age->make()));
 
     } catch (ogss::Exception &e) {
         GTEST_FAIL() << "unexpected failure: " << e.what();
@@ -81,7 +97,8 @@ TEST(AgePoolOfTest, PoolOfUnknownType) {
         sg->Age->make();
         sg->close();
 
-        auto sg1 = std::unique_ptr<::empty::api::File>(::empty::api::File::open(sg->currentPath()));
+        auto sg1 = std::unique_ptr<::empty::api::File>(
+          ::empty::api::File::open(sg->currentPath()));
         auto p = *sg1->begin();
         auto o = p->allObjects()->next();
 
@@ -100,14 +117,15 @@ TEST(AgePoolOfTest, PoolOfUnknownType) {
 TEST(AgePoolOfTest, PoolOfUnknownType2) {
     try {
         auto sg = common::tempFile<File>();
-        age::Age * a = sg->Age->make();
+        age::Age *a = sg->Age->make();
         sg->close();
 
-        auto sg1 = std::unique_ptr<::empty::api::File>(::empty::api::File::open(sg->currentPath()));
+        auto sg1 = std::unique_ptr<::empty::api::File>(
+          ::empty::api::File::open(sg->currentPath()));
         auto p = *sg1->begin();
 
         ASSERT_EQ(p, sg1->pool(p->allObjects()->next()));
-        ASSERT_EQ(p, sg1->pool(a));
+        ASSERT_FALSE(sg1->pool(a));
 
     } catch (ogss::Exception &e) {
         GTEST_FAIL() << "unexpected failure: " << e.what();
@@ -125,7 +143,8 @@ TEST(AgePoolOfTest, PoolOfKnownType) {
         sg->close();
 
         ASSERT_EQ(sg->Age, sg->pool(age));
-        ASSERT_EQ(sg->Age, sg->pool(ogss::api::String ("Age")));
+        std::string name("Age");
+        ASSERT_EQ(sg->Age, sg->pool(&name));
         ASSERT_EQ(sg->Age, sg->pool(sg->Age->name));
 
     } catch (ogss::Exception &e) {
