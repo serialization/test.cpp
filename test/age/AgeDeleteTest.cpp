@@ -2,11 +2,11 @@
 // Created by Sarah Stieß on 28.05.19.
 //
 
-#include <gtest/gtest.h>
-#include "../../src/age/File.h"
-#include "../common/utils.h"
-#include "../../src/empty/File.h"
 #include "../../lib/ogss.common.cpp/ogss/internal/AbstractPool.h"
+#include "../../src/age/File.h"
+#include "../../src/empty/File.h"
+#include "../common/utils.h"
+#include <gtest/gtest.h>
 
 using ::age::api::File;
 
@@ -47,8 +47,9 @@ TEST(AgeDeleteTest, DeleteUnknown) {
         sg->Age->build()->age(1)->make();
         sg->close();
 
-        //empty does not know age
-        auto sg1 = std::unique_ptr<::empty::api::File>(::empty::api::File::open(sg->currentPath()));
+        // empty does not know age
+        auto sg1 = std::unique_ptr<::empty::api::File>(
+          ::empty::api::File::open(sg->currentPath()));
 
         ASSERT_EQ(1, sg1->size());
 
@@ -158,19 +159,8 @@ TEST(AgeDeleteTest, DeleteNull) {
 }
 
 TEST(AgeDeleteTest, DeleteIllegal) {
-    try {
-        auto sg = common::tempFile<File>();
-        auto sg1 = common::tempFile<File>();
-        sg1->free(sg->Age->build()->age(0)->make());
+    auto sg = common::tempFile<File>();
+    auto sg1 = common::tempFile<File>();
 
-        //sg1->close();
-
-        GTEST_FAIL() << "illegal deletes should be checked for"; //sonst exception in close();
-    } catch (ogss::Exception &e) {
-        // everything all right
-    } catch (std::exception &e) {
-        GTEST_FAIL() << "std::exception: " << e.what();
-    } catch (...) {
-        GTEST_FAIL() << "unexpected exception";
-    }
+    ASSERT_DEBUG_DEATH(sg1->free(sg->Age->build()->age(0)->make()), ".*");
 }

@@ -2,11 +2,11 @@
 // Created by Sarah Stieß on 28.05.19.
 //
 
-#include <gtest/gtest.h>
-#include "../../src/age/File.h"
-#include "../common/utils.h"
-#include "../../src/empty/File.h"
 #include "../../lib/ogss.common.cpp/ogss/internal/AbstractPool.h"
+#include "../../src/age/File.h"
+#include "../../src/empty/File.h"
+#include "../common/utils.h"
+#include <gtest/gtest.h>
 
 using ::age::api::File;
 
@@ -48,7 +48,7 @@ TEST(AgePoolAddTest, ContainsKnown) {
         auto sg1 = std::unique_ptr<File>(File::open(sg->currentPath()));
 
         auto it = sg1->Age->allObjects();
-        //just ensuring that we'll enter the loop.
+        // just ensuring that we'll enter the loop.
         ASSERT_TRUE(it->hasNext());
         while (it->hasNext()) {
             auto x = it->next();
@@ -71,15 +71,16 @@ TEST(AgePoolAddTest, ContainsUnknown) {
         sg->Age->build()->age(1)->make();
         sg->close();
 
-        auto sg1 = std::unique_ptr<::empty::api::File>(::empty::api::File::open(sg->currentPath()));
+        auto sg1 = std::unique_ptr<::empty::api::File>(
+          ::empty::api::File::open(sg->currentPath()));
 
-        //age type is the only type. empty has no types of its own.
-        ASSERT_EQ(1,sg1->size());
+        // age type is the only type. empty has no types of its own.
+        ASSERT_EQ(1, sg1->size());
 
         for (auto t = sg1->begin(); t < sg1->end(); t++) {
             ASSERT_EQ(2, (*t)->size());
             auto it = (*t)->allObjects();
-            //just ensuring that we'll enter the loop.
+            // just ensuring that we'll enter the loop.
             ASSERT_TRUE(it->hasNext());
             while (it->hasNext()) {
                 auto x = it->next();
@@ -107,7 +108,7 @@ TEST(AgePoolAddTest, ContainsForeign) {
         ASSERT_EQ(0, sg1->Age->size());
 
         auto it = sg->Age->allObjects();
-        //just ensuring that we'll enter the loop.
+        // just ensuring that we'll enter the loop.
         ASSERT_TRUE(it->hasNext());
         while (it->hasNext()) {
             auto x = it->next();
