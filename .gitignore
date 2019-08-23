@@ -33,3 +33,4 @@ lib/ogss.common.cpp
 *.exe
 *.out
 *.app
+/build/
