@@ -23,7 +23,7 @@ TEST(LazyGetTest, test0) {
         auto obj = pool->getAsAnnotation(a->ID());
         auto f = pool->fields().next();
 
-        f->setR(obj, ::ogss::box(42));
+        f->setR(obj, ::ogss::api::box(42));
 
     } catch (ogss::Exception &e) {
         GTEST_FAIL() << "an exception was thrown:" << std::endl << e.what();

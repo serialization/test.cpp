@@ -72,7 +72,7 @@ TEST(FlushTest, flushWithUnknown) {
         sf2->flush();
         auto f = (*sf2->begin())->fields().next();
         auto o = (*sf2->begin())->getAsAnnotation(a->ID());
-        f->setR(o, ogss::box(17L));
+        f->setR(o, ::ogss::api::box(17L));
         sf2->flush();
 
         auto sf3 = age::api::File::open(sf->currentPath(), ::ogss::api::WriteMode::write);
